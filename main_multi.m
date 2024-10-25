@@ -38,7 +38,7 @@ functionNameList = {'F24', 'F25', 'F26', 'F27', 'F28', 'F29', 'F30', 'F31', 'F32
 % functionNameList = {'F112', 'F113', 'F114', 'F115', 'F116', 'F117', 'F118', 'F119', 'F120', 'F121'};
 
 % Fold is recommended to be set to 30
-fold = 30;
+fold = 3;
 
 % Prepare output preprocessing
 % Get the current year, month, day, time and minute
@@ -111,7 +111,7 @@ for functionNum = 1:size(functionNameList, 2)
     startLineNum = startLineNum + algorithmNum;
 
     % plot curveline
-    % clf
+    clf
     set(gcf, 'Position', [0, 0, 1000, 600])
 
     for it = 1:algorithmNum
