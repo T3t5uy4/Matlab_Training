@@ -13,7 +13,7 @@ numOfRecord = 40;
 % population dimension
 dim = 30;
 % Maximum number of iterations, recommended maximum training is 300,000
-maxIters = 300000;
+maxIters = 3000;
 
 %% Algorithm
 % Select the algorithm to be trained
@@ -29,7 +29,7 @@ algorithmName = {'DEAHHO', 'HHO', 'WOA'};
 % CEC2005
 % functionNameList = {'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'F13', 'F14', 'F15', 'F16', 'F17', 'F18', 'F19', 'F20', 'F21', 'F22', 'F23'};
 % CEC2013
-% functionNameList = {'F24', 'F25', 'F26', 'F27', 'F28', 'F29', 'F30', 'F31', 'F32', 'F33', 'F34', 'F35', 'F36', 'F37', 'F38', 'F39', 'F40', 'F41', 'F42', 'F43', 'F44', 'F45', 'F46', 'F47', 'F48', 'F49', 'F50', 'F51'};
+functionNameList = {'F24', 'F25', 'F26', 'F27', 'F28', 'F29', 'F30', 'F31', 'F32', 'F33', 'F34', 'F35', 'F36', 'F37', 'F38', 'F39', 'F40', 'F41', 'F42', 'F43', 'F44', 'F45', 'F46', 'F47', 'F48', 'F49', 'F50', 'F51'};
 % CEC2014
 % functionNameList = {'F52', 'F53', 'F54', 'F55', 'F56', 'F57', 'F58', 'F59', 'F60', 'F61', 'F62', 'F63', 'F64', 'F65', 'F66', 'F67', 'F68', 'F69', 'F70', 'F71', 'F72', 'F73', 'F74', 'F75', 'F76', 'F77', 'F78', 'F79', 'F80', 'F81'};
 % CEC2017
