@@ -1,5 +1,5 @@
 % The Whale optimization Algorithm
-function [bestFitness, bestPosition, convergenceCurve] = ISNMWOA(searchAgentsNum, maxIters, lb, ub, dim, fobj)
+function [bestFitness, bestPosition, convergenceCurve] = ISNMWOA(searchAgentsNum, maxFes, lb, ub, dim, fobj)
     % Initialize position vector and fitness for the best
     bestFitness = inf;
     bestPosition = zeros(1, dim);
@@ -10,10 +10,10 @@ function [bestFitness, bestPosition, convergenceCurve] = ISNMWOA(searchAgentsNum
     lb = ones(1, dim) .* lb;
     ub = ones(1, dim) .* ub;
 
-    iter = 0;
+    fe = 0;
     J = 1/3;
 
-    while iter < maxIters
+    while fe < maxFes
 
         for i = 1:size(positions, 1)
             % Check boundries
@@ -44,8 +44,8 @@ function [bestFitness, bestPosition, convergenceCurve] = ISNMWOA(searchAgentsNum
 
         end
 
-        a = 2 * (1 - iter / maxIters);
-        a2 = -1 - (iter / maxIters);
+        a = 2 * (1 - fe / maxFes);
+        a2 = -1 - (fe / maxFes);
         % Update the Whale's position
         for i = 1:size(positions, 1)
             r1 = rand;
@@ -84,7 +84,7 @@ function [bestFitness, bestPosition, convergenceCurve] = ISNMWOA(searchAgentsNum
         % options = optimset('', 'final');
         [bestPosition, bestFitness] = fminsearchbnd(fobj, bestPosition, lb, ub);
 
-        iter = iter + 1;
+        fe = fe + 1;
         convergenceCurve(iter) = bestFitness;
 
     end

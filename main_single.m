@@ -13,7 +13,7 @@ numOfRecord = 40;
 % population dimension
 dim = 30;
 % Maximum number of iterations, recommended maximum training is 300,000
-maxIters = 3000;
+maxFes = 3000;
 
 %% Algorithm
 % Select the algorithm to be trained
@@ -75,7 +75,7 @@ for functionNum = 1:size(functionNameList, 2)
 
         for cnum = 1:algorithmNum
             algorithm = str2func(algorithmName{cnum});
-            [~, ~, curve] = algorithm(searchAgentsNum, maxIters, lb, ub, dim, fobj);
+            [~, ~, curve] = algorithm(searchAgentsNum, maxFes, lb, ub, dim, fobj);
             resultCurves(cnum, cfold, :) = uniformSampling(curve, numOfRecord);
         end
 
@@ -115,7 +115,7 @@ for functionNum = 1:size(functionNameList, 2)
         yy(it, :) = mean(allCurves((it - 1) * fold + 1:(it - 1) * fold + fold, :));
     end
 
-    xx = [1:numOfRecord] * (maxIters / numOfRecord);
+    xx = [1:numOfRecord] * (maxFes / numOfRecord);
 
     for it = 1:algorithmNum
         semilogy(xx, yy(it, :), [lineStyles{it} markers{it}], 'LineWidth', 1.5, 'Color', markerEdgeColors(it, :));
