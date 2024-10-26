@@ -9,11 +9,11 @@ addpath(genpath(pwd));
 % Set initial training parameters
 % initial population size
 searchAgentsNum = 30;
-numOfRecord = 40;
+numOfRecord = 50;
 % population dimension
 dim = 30;
 % Maximum number of iterations, recommended maximum training is 300,000
-maxFes = 30000;
+maxFes = 3000;
 
 %% Algorithm
 % Select the algorithm to be trained
