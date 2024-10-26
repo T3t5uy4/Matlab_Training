@@ -13,7 +13,7 @@ function [gBestScore, gBest, cg_curve] = PSO(noP, Max_iteration, lb, ub, dim, fo
     vMin = -vMax;
 
     % Initializations
-    fe = Max_iteration;
+    iter = Max_iteration;
     vel = zeros(noP, dim);
     pBestScore = zeros(noP);
     pBest = zeros(noP, dim);

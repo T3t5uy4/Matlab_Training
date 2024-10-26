@@ -1,5 +1,5 @@
 % The Enhanced Harris hawks optimization Algorithm
-function [bestFitness, bestPosition, convergenceCurve] = EHHO(searchAgentsNum, maxFes, lb, ub, dim, fobj)
+function [bestFitness, bestPosition, convergenceCurve] = EHHO(searchAgentsNum, maxIters, lb, ub, dim, fobj)
     % Initialize position vector and fitness for the best
     bestFitness = inf;
     bestPosition = zeros(1, dim);
@@ -8,9 +8,9 @@ function [bestFitness, bestPosition, convergenceCurve] = EHHO(searchAgentsNum, m
     positions = initialization(searchAgentsNum, dim, ub, lb);
     convergenceCurve = [];
 
-    fe = 0;
+    iter = 0;
 
-    while fe < maxFes
+    while iter < maxIters
 
         for i = 1:size(positions, 1)
             % Check boundries
@@ -31,7 +31,7 @@ function [bestFitness, bestPosition, convergenceCurve] = EHHO(searchAgentsNum, m
         for i = 1:size(positions, 1)
             % Get the escape energies
             E0 = 2 * rand - 1;
-            E = 2 * E0 * (1 - fe / maxFes);
+            E = 2 * E0 * (1 - iter / maxIters);
 
             if abs(E) >= 1 % Exploration stage
                 q = rand;
@@ -108,7 +108,7 @@ function [bestFitness, bestPosition, convergenceCurve] = EHHO(searchAgentsNum, m
 
         end
 
-        fe = fe + 1;
+        iter = iter + 1;
         convergenceCurve(iter) = bestFitness;
 
     end

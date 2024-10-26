@@ -1,5 +1,5 @@
 % The Particle Swarm Optimization Algorithm
-function [bestFitness, bestPosition, convergenceCurve] = PSO(searchAgentsNum, maxFes, lb, ub, dim, fobj)
+function [bestFitness, bestPosition, convergenceCurve] = PSO(searchAgentsNum, maxIters, lb, ub, dim, fobj)
     % Initialize position vector and fitness for the best
     bestFitness = inf;
     bestPosition = zeros(1, dim);
@@ -8,9 +8,9 @@ function [bestFitness, bestPosition, convergenceCurve] = PSO(searchAgentsNum, ma
     positions = initialization(searchAgentsNum, dim, ub, lb);
     convergenceCurve = [];
 
-    fe = 0;
+    iter = 0;
 
-    while fe < maxFes
+    while iter < maxIters
 
         for i = 1:size(positions, 1)
             % Check boundries
@@ -29,7 +29,7 @@ function [bestFitness, bestPosition, convergenceCurve] = PSO(searchAgentsNum, ma
 
         % Update
 
-        fe = fe + 1;
+        iter = iter + 1;
         convergenceCurve(iter) = bestFitness;
 
     end

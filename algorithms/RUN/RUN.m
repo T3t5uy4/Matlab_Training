@@ -1,10 +1,10 @@
-function [bestFitness, bestPosition, Convergence_curve] = RUN(searchAgentNum, maxFes, lb, ub, dim, fobj)
+function [bestFitness, bestPosition, Convergence_curve] = RUN(searchAgentNum, maxIters, lb, ub, dim, fobj)
 
     Cost = zeros(searchAgentNum, 1); % Record the Fitness of all Solutions
     X = initialization(searchAgentNum, dim, ub, lb); % Initialize the set of random solutions
     Xnew2 = zeros(1, dim);
 
-    Convergence_curve = zeros(1, maxFes);
+    Convergence_curve = zeros(1, maxIters);
 
     for i = 1:searchAgentNum
         Cost(i) = fobj(X(i, :)); % Calculate the Value of Objective Function
@@ -18,9 +18,9 @@ function [bestFitness, bestPosition, Convergence_curve] = RUN(searchAgentNum, ma
     %% Main Loop of RUN
     it = 1; %Number of iterations
 
-    while it < maxFes
+    while it < maxIters
         it = it + 1;
-        f = 20 .* exp(- (12 .* (it / maxFes))); % (Eq.17.6)
+        f = 20 .* exp(- (12 .* (it / maxIters))); % (Eq.17.6)
         Xavg = mean(X); % Determine the Average of Solutions
         SF = 2 .* (0.5 - rand(1, searchAgentNum)) .* f; % Determine the Adaptive Factor (Eq.17.5)
 
@@ -32,7 +32,7 @@ function [bestFitness, bestPosition, Convergence_curve] = RUN(searchAgentNum, ma
             [~, ind1] = min(Cost([A B C]));
 
             % Determine Delta X (Eqs. 11.1 to 11.3)
-            gama = rand .* (X(i, :) - rand(1, dim) .* (ub - lb)) .* exp(-4 * it / maxFes);
+            gama = rand .* (X(i, :) - rand(1, dim) .* (ub - lb)) .* exp(-4 * it / maxIters);
             Stp = rand(1, dim) .* ((bestPosition - rand .* Xavg) + gama);
             DelX = 2 * rand(1, dim) .* (abs(Stp));
 
@@ -76,7 +76,7 @@ function [bestFitness, bestPosition, Convergence_curve] = RUN(searchAgentNum, ma
 
             %% Enhanced solution quality (ESQ)  (Eq. 19)
             if rand < 0.5
-                EXP = exp(-5 * rand * it / maxFes);
+                EXP = exp(-5 * rand * it / maxIters);
                 r = floor(Unifrnd(-1, 2, 1, 1));
 
                 u = 2 * rand(1, dim);
