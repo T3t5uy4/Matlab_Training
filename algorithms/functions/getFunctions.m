@@ -673,60 +673,240 @@ function [lb, ub, dim, fobj] = getFunctions(F, DimValue)
 
         case 'F112'
             fobj = @F112;
-            lb = -8192;
-            ub = 8192;
-            dim = 9;
+            lb = -100;
+            ub = 100;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
 
         case 'F113'
             fobj = @F113;
-            lb = -16384;
-            ub = 16384;
-            dim = 16;
+            lb = -100;
+            ub = 100;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
 
         case 'F114'
             fobj = @F114;
-            lb = -4;
-            ub = 4;
-            dim = 18;
+            lb = -100;
+            ub = 100;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
 
         case 'F115'
             fobj = @F115;
             lb = -100;
             ub = 100;
-            dim = 10;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
 
         case 'F116'
             fobj = @F116;
             lb = -100;
             ub = 100;
-            dim = 10;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
 
         case 'F117'
             fobj = @F117;
             lb = -100;
             ub = 100;
-            dim = 10;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
 
         case 'F118'
             fobj = @F118;
             lb = -100;
             ub = 100;
-            dim = 10;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
 
         case 'F119'
             fobj = @F119;
             lb = -100;
             ub = 100;
-            dim = 10;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
 
         case 'F120'
             fobj = @F120;
             lb = -100;
             ub = 100;
-            dim = 10;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
 
         case 'F121'
             fobj = @F121;
+            lb = -100;
+            ub = 100;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
+
+        case 'F122'
+            fobj = @F122;
+            lb = -100;
+            ub = 100;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
+
+        case 'F123'
+            fobj = @F123;
+            lb = -100;
+            ub = 100;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
+
+        case 'F124'
+            fobj = @F124;
+            lb = -100;
+            ub = 100;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
+
+        case 'F125'
+            fobj = @F125;
+            lb = -100;
+            ub = 100;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
+
+        case 'F126'
+            fobj = @F126;
+            lb = -100;
+            ub = 100;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
+
+        case 'F127'
+            fobj = @F127;
+            lb = -100;
+            ub = 100;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
+
+        case 'F128'
+            fobj = @F128;
+            lb = -100;
+            ub = 100;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
+
+        case 'F129'
+            fobj = @F129;
+            lb = -100;
+            ub = 100;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
+
+        case 'F130'
+            fobj = @F130;
+            lb = -100;
+            ub = 100;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
+
+        case 'F131'
+            fobj = @F131;
+            lb = -100;
+            ub = 100;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
+
+        case 'F132'
+            fobj = @F132;
+            lb = -100;
+            ub = 100;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
+
+        case 'F133'
+            fobj = @F133;
+            lb = -100;
+            ub = 100;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
+
+        case 'F134'
+            fobj = @F134;
+            lb = -100;
+            ub = 100;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
+
+        case 'F135'
+            fobj = @F135;
+            lb = -100;
+            ub = 100;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
+
+        case 'F136'
+            fobj = @F136;
+            lb = -100;
+            ub = 100;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
+
+        case 'F137'
+            fobj = @F137;
+            lb = -100;
+            ub = 100;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
+
+        case 'F138'
+            fobj = @F138;
+            lb = -100;
+            ub = 100;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
+
+        case 'F139'
+            fobj = @F139;
+            lb = -100;
+            ub = 100;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
+
+        case 'F140'
+            fobj = @F140;
+            lb = -100;
+            ub = 100;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
+
+        case 'F141'
+            fobj = @F141;
+            lb = -100;
+            ub = 100;
+            dim = DimValue; %Test functions are only defined for D=2,10,30,50,100.
+
+        case 'F142'
+            fobj = @F142;
+            lb = -8192;
+            ub = 8192;
+            dim = 9;
+
+        case 'F143'
+            fobj = @F143;
+            lb = -16384;
+            ub = 16384;
+            dim = 16;
+
+        case 'F144'
+            fobj = @F144;
+            lb = -4;
+            ub = 4;
+            dim = 18;
+
+        case 'F145'
+            fobj = @F145;
+            lb = -100;
+            ub = 100;
+            dim = 10;
+
+        case 'F146'
+            fobj = @F146;
+            lb = -100;
+            ub = 100;
+            dim = 10;
+
+        case 'F147'
+            fobj = @F147;
+            lb = -100;
+            ub = 100;
+            dim = 10;
+
+        case 'F148'
+            fobj = @F148;
+            lb = -100;
+            ub = 100;
+            dim = 10;
+
+        case 'F149'
+            fobj = @F149;
+            lb = -100;
+            ub = 100;
+            dim = 10;
+
+        case 'F150'
+            fobj = @F150;
+            lb = -100;
+            ub = 100;
+            dim = 10;
+
+        case 'F151'
+            fobj = @F151;
             lb = -100;
             ub = 100;
             dim = 10;
@@ -1309,53 +1489,204 @@ function o = F111(x)
     o = feval(fhd, x', 30);
 end
 
-%% CEC2019
+%% CEC2018
 function o = F112(x)
-    fhd = str2func('cec19_func');
+    fhd = str2func('cec18_func');
     o = feval(fhd, x', 1);
 end
 
 function o = F113(x)
-    fhd = str2func('cec19_func');
+    fhd = str2func('cec18_func');
     o = feval(fhd, x', 2);
 end
 
 function o = F114(x)
-    fhd = str2func('cec19_func');
+    fhd = str2func('cec18_func');
     o = feval(fhd, x', 3);
 end
 
 function o = F115(x)
-    fhd = str2func('cec19_func');
+    fhd = str2func('cec18_func');
     o = feval(fhd, x', 4);
 end
 
 function o = F116(x)
-    fhd = str2func('cec19_func');
+    fhd = str2func('cec18_func');
     o = feval(fhd, x', 5);
 end
 
 function o = F117(x)
-    fhd = str2func('cec19_func');
+    fhd = str2func('cec18_func');
     o = feval(fhd, x', 6);
 end
 
 function o = F118(x)
-    fhd = str2func('cec19_func');
+    fhd = str2func('cec18_func');
     o = feval(fhd, x', 7);
 end
 
 function o = F119(x)
-    fhd = str2func('cec19_func');
+    fhd = str2func('cec18_func');
     o = feval(fhd, x', 8);
 end
 
 function o = F120(x)
-    fhd = str2func('cec19_func');
+    fhd = str2func('cec18_func');
     o = feval(fhd, x', 9);
 end
 
 function o = F121(x)
+    fhd = str2func('cec18_func');
+    o = feval(fhd, x', 10);
+end
+
+function o = F122(x)
+    fhd = str2func('cec18_func');
+    o = feval(fhd, x', 11);
+end
+
+function o = F123(x)
+    fhd = str2func('cec18_func');
+    o = feval(fhd, x', 12);
+end
+
+function o = F124(x)
+    fhd = str2func('cec18_func');
+    o = feval(fhd, x', 13);
+end
+
+function o = F125(x)
+    fhd = str2func('cec18_func');
+    o = feval(fhd, x', 14);
+end
+
+function o = F126(x)
+    fhd = str2func('cec18_func');
+    o = feval(fhd, x', 15);
+end
+
+function o = F127(x)
+    fhd = str2func('cec18_func');
+    o = feval(fhd, x', 16);
+end
+
+function o = F128(x)
+    fhd = str2func('cec18_func');
+    o = feval(fhd, x', 17);
+end
+
+function o = F129(x)
+    fhd = str2func('cec18_func');
+    o = feval(fhd, x', 18);
+end
+
+function o = F130(x)
+    fhd = str2func('cec18_func');
+    o = feval(fhd, x', 19);
+end
+
+function o = F131(x)
+    fhd = str2func('cec18_func');
+    o = feval(fhd, x', 20);
+end
+
+function o = F132(x)
+    fhd = str2func('cec18_func');
+    o = feval(fhd, x', 21);
+end
+
+function o = F133(x)
+    fhd = str2func('cec18_func');
+    o = feval(fhd, x', 22);
+end
+
+function o = F134(x)
+    fhd = str2func('cec18_func');
+    o = feval(fhd, x', 23);
+end
+
+function o = F135(x)
+    fhd = str2func('cec18_func');
+    o = feval(fhd, x', 24);
+end
+
+function o = F136(x)
+    fhd = str2func('cec18_func');
+    o = feval(fhd, x', 25);
+end
+
+function o = F137(x)
+    fhd = str2func('cec18_func');
+    o = feval(fhd, x', 26);
+end
+
+function o = F138(x)
+    fhd = str2func('cec18_func');
+    o = feval(fhd, x', 27);
+end
+
+function o = F139(x)
+    fhd = str2func('cec18_func');
+    o = feval(fhd, x', 28);
+end
+
+function o = F140(x)
+    fhd = str2func('cec18_func');
+    o = feval(fhd, x', 29);
+end
+
+function o = F141(x)
+    fhd = str2func('cec18_func');
+    o = feval(fhd, x', 30);
+end
+
+%% CEC2019
+function o = F142(x)
+    fhd = str2func('cec19_func');
+    o = feval(fhd, x', 1);
+end
+
+function o = F143(x)
+    fhd = str2func('cec19_func');
+    o = feval(fhd, x', 2);
+end
+
+function o = F144(x)
+    fhd = str2func('cec19_func');
+    o = feval(fhd, x', 3);
+end
+
+function o = F145(x)
+    fhd = str2func('cec19_func');
+    o = feval(fhd, x', 4);
+end
+
+function o = F146(x)
+    fhd = str2func('cec19_func');
+    o = feval(fhd, x', 5);
+end
+
+function o = F147(x)
+    fhd = str2func('cec19_func');
+    o = feval(fhd, x', 6);
+end
+
+function o = F148(x)
+    fhd = str2func('cec19_func');
+    o = feval(fhd, x', 7);
+end
+
+function o = F149(x)
+    fhd = str2func('cec19_func');
+    o = feval(fhd, x', 8);
+end
+
+function o = F150(x)
+    fhd = str2func('cec19_func');
+    o = feval(fhd, x', 9);
+end
+
+function o = F151(x)
     fhd = str2func('cec19_func');
     o = feval(fhd, x', 10);
 end
