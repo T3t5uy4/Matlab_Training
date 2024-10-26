@@ -13,12 +13,12 @@ numOfRecord = 40;
 % population dimension
 dim = 30;
 % Maximum number of iterations, recommended maximum training is 300,000
-maxIters = 3000;
+maxIters = 30000;
 
 %% Algorithm
 % Select the algorithm to be trained
 % Please do not select more than 13 algorithms
-algorithmName = {'DEAHHO', 'HHO', 'WOA'};
+algorithmName = {'DEAHHO', 'HHO'};
 
 % Select training data set
 % 1-23 is the CEC05 function set
@@ -32,11 +32,11 @@ algorithmName = {'DEAHHO', 'HHO', 'WOA'};
 % CEC2013
 % functionNameList = {'F24', 'F25', 'F26', 'F27', 'F28', 'F29', 'F30', 'F31', 'F32', 'F33', 'F34', 'F35', 'F36', 'F37', 'F38', 'F39', 'F40', 'F41', 'F42', 'F43', 'F44', 'F45', 'F46', 'F47', 'F48', 'F49', 'F50', 'F51'};
 % CEC2014
-% functionNameList = {'F52', 'F53', 'F54', 'F55', 'F56', 'F57', 'F58', 'F59', 'F60', 'F61', 'F62', 'F63', 'F64', 'F65', 'F66', 'F67', 'F68', 'F69', 'F70', 'F71', 'F72', 'F73', 'F74', 'F75', 'F76', 'F77', 'F78', 'F79', 'F80', 'F81'};
+functionNameList = {'F52', 'F53', 'F54', 'F55', 'F56', 'F57', 'F58', 'F59', 'F60', 'F61', 'F62', 'F63', 'F64', 'F65', 'F66', 'F67', 'F68', 'F69', 'F70', 'F71', 'F72', 'F73', 'F74', 'F75', 'F76', 'F77', 'F78', 'F79', 'F80', 'F81'};
 % CEC2017
 % functionNameList = {'F82', 'F83', 'F84', 'F85', 'F86', 'F87', 'F88', 'F89', 'F90', 'F91', 'F92', 'F93', 'F94', 'F95', 'F96', 'F97', 'F98', 'F99', 'F100', 'F101', 'F102', 'F103', 'F104', 'F105', 'F106', 'F107', 'F108', 'F109', 'F110', 'F111'};
 % CEC 2018
-functionNameList = {'F112', 'F114', 'F115', 'F116', 'F117', 'F118', 'F119', 'F120', 'F121', 'F122', 'F123', 'F124', 'F125', 'F126', 'F127', 'F128', 'F129', 'F130', 'F131', 'F132', 'F133', 'F134', 'F135', 'F136', 'F137', 'F138', 'F139', 'F140', 'F141'};
+% functionNameList = {'F112', 'F114', 'F115', 'F116', 'F117', 'F118', 'F119', 'F120', 'F121', 'F122', 'F123', 'F124', 'F125', 'F126', 'F127', 'F128', 'F129', 'F130', 'F131', 'F132', 'F133', 'F134', 'F135', 'F136', 'F137', 'F138', 'F139', 'F140', 'F141'};
 % CEC2019
 % functionNameList = {'F142', 'F143', 'F144', 'F145', 'F146', 'F147', 'F148', 'F149', 'F150', 'F151'};
 

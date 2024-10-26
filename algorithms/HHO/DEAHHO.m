@@ -10,7 +10,7 @@ function [bestFitness, bestPosition, convergenceCurve] = DEAHHO(searchAgentsNum,
 
     iter = 0;
     t = 0;
-    keepRate = 0.0;
+    changeRate = 0.0;
 
     while iter < maxIters
 
@@ -30,6 +30,7 @@ function [bestFitness, bestPosition, convergenceCurve] = DEAHHO(searchAgentsNum,
 
         end
 
+        changeCount = 0;
         % Update the Harris hawk's position
         for i = 1:size(positions, 1)
             % Get the escape energies
@@ -95,120 +96,29 @@ function [bestFitness, bestPosition, convergenceCurve] = DEAHHO(searchAgentsNum,
 
             end
 
-        end
+            % Produce mutant individuals
+            mutantPosition = positions(i, :) + rand * (bestPosition - positions(i, :));
+            % cross-merge
+            for j = 1:size(mutantPosition, 1)
 
-        % Sort positions as fobj
-        fobjPositions = [];
-
-        for i = 1:size(positions, 1)
-            fobjPositions(i) = fobj(positions(i, :));
-        end
-
-        [~, sortedIndices] = sort(fobjPositions);
-        sortedPositions = positions(sortedIndices, :);
-
-        % Divede the positions
-        partSize1 = floor(searchAgentsNum / 3 * (1 - iter / (maxIters * 3)));
-        partSize2 = floor(1 * searchAgentsNum / 3 * (1 + keepRate));
-
-        bestPart = sortedPositions(1:partSize1, :);
-        worstPart = sortedPositions(searchAgentsNum - partSize2 + 1:end, :);
-
-        % Update the best part
-        [bestPart, iter] = DEA(bestPart, dim, fobj, iter);
-
-        % Update the worst part
-        for i = 1:size(worstPart, 1)
-            worstPart(i, :) = worstPart(i, :) + (1 / (t + 1)) * (bestPosition - worstPart(i, :));
-        end
-
-        % Merge positions
-        mergedPositions = [bestPart; positions; worstPart];
-        fobjPositions = [];
-
-        for i = 1:size(mergedPositions, 1)
-            fobjPositions(i) = fobj(mergedPositions(i, :));
-        end
-
-        [~, sortedIndices] = sort(fobjPositions);
-        sortedPositions = mergedPositions(sortedIndices, :);
-        positions = sortedPositions(1:searchAgentsNum, :);
-        count = 0;
-
-        for i = 1:size(positions(1, :))
-
-            for j = 1:size(worstPart, 1)
-
-                if isequal(positions(i, :), worstPart(j, :))
-                    count = count + 1;
-                    break;
+                if rand > (1 + changeRate) / 2
+                    mutantPosition(1, j) = positions(i, j);
                 end
 
             end
 
-        end
-
-        keepRate = count / partSize2;
-        fitness = fobj(positions(1, :));
-
-        if fitness < bestFitness
-            bestFitness = fitness;
-            bestPosition = positions(1, :);
-        end
-
-        iter = iter + 1;
-        t = t + 1;
-        convergenceCurve(t) = bestFitness;
-
-    end
-
-end
-
-% The Differential Evolution Algorithm
-function [positions, iter] = DEA(positions, dim, fobj, iter)
-    F = 0.5;
-    CR = 0.9;
-    maxIters = 50;
-    newPositions = positions;
-
-    for t = 1:maxIters
-
-        for i = 1:size(newPositions, 1)
-            idxs = randperm(size(newPositions, 1), 3);
-            r1 = idxs(1);
-            r2 = idxs(2);
-            r3 = idxs(3);
-
-            mutant = newPositions(r1, :) + F * (newPositions(r2, :) - newPositions(r3, :));
-
-            trial = newPositions(i, :);
-
-            for j = 1:dim
-
-                if rand < CR
-                    trial(j) = mutant(j);
-                end
-
-            end
-
-            if fobj(trial) < fobj(newPositions(i, :))
-                newPositions(i, :) = trial;
+            if fobj(mutantPosition) < fobj(positions(i, :))
+                positions(i, :) = mutantPosition;
+                changeCount = changeCount + 1;
                 iter = iter + 1;
             end
 
         end
 
-    end
-
-    tempo = [];
-
-    for i = 1:size(positions, 1)
-
-        if ~isequal(newPositions(i, :), positions(i, :))
-            tempo(end + 1, :) = newPositions(i, :);
-        end
+        t = t + 1;
+        changeRate = changeCount / searchAgentsNum;
+        convergenceCurve(t) = bestFitness;
 
     end
 
-    positions = tempo;
 end
