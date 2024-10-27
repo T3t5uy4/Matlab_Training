@@ -1,5 +1,5 @@
 % The Harris hawks optimization Algorithm
-function [bestFitness, bestPosition, convergenceCurve] = DEAHHO(searchAgentsNum, maxFes, lb, ub, dim, fobj)
+function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version3(searchAgentsNum, maxFes, lb, ub, dim, fobj)
     % Initialize position vector and fitness for the best
     bestFitness = inf;
     bestPosition = zeros(1, dim);
