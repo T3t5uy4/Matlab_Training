@@ -1,16 +1,17 @@
 % The Whale optimization Algorithm
-function [bestFitness, bestPosition, convergenceCurve] = MWOA(searchAgentsNum, maxIters, lb, ub, dim, fobj)
+function [bestFitness, bestPosition, convergenceCurve] = MWOA(searchAgentsNum, maxFes, lb, ub, dim, fobj)
     % Initialize position vector and fitness for the best
     bestFitness = inf;
     bestPosition = zeros(1, dim);
 
     % Initialize the positions of search agents
     positions = initialization(searchAgentsNum, dim, ub, lb);
+    fitness = [];
     convergenceCurve = [];
 
-    iter = 0;
+    fe = 0;
 
-    while iter < maxIters
+    while fe < maxFes
 
         for i = 1:size(positions, 1)
             % Check boundries
@@ -18,17 +19,18 @@ function [bestFitness, bestPosition, convergenceCurve] = MWOA(searchAgentsNum, m
             FL = positions(i, :) < lb;
             positions(i, :) = (positions(i, :) .* (~(FU + FL))) + ub .* FU + lb .* FL;
             % Fitness of locations
-            fitness = fobj(positions(i, :));
+            fitness(i) = fobj(positions(i, :));
+            fe = fe + 1;
 
-            if fitness < bestFitness
-                bestFitness = fitness;
+            if fitness(i) < bestFitness
+                bestFitness = fitness(i);
                 bestPosition = positions(i, :);
             end
 
         end
 
-        a = 2 * (1 - iter / maxIters);
-        a2 = -1 - (iter / maxIters);
+        a = 2 * (1 - fe / maxFes);
+        a2 = -1 - (fe / maxFes);
         % Update the Whale's position
         for i = 1:size(positions, 1)
             r1 = rand;
@@ -67,56 +69,34 @@ function [bestFitness, bestPosition, convergenceCurve] = MWOA(searchAgentsNum, m
         % Levy-flight
         for i = 1:size(positions, 1)
             positionV = positions(i, :) + 0.75 * Levy(dim) .* (positions(i, :) - bestPosition);
-            fitness = fobj(positionV);
+            fitnessV = fobj(positionV);
+            fe = fe + 1;
 
-            if fitness < fobj(positions(i, :))
+            if fitnessV < fobj(positions(i, :))
                 positions(i, :) = positionV;
             end
 
-            if fitness < fobj(bestPosition)
+            if fitnessV < bestFitness
+                bestFitness = fitnessV;
                 bestPosition = positionV;
             end
 
         end
 
         % pattern search
-        if mod(iter, round(maxIters * 0.1)) == 0
+        if mod(fe, round(maxFes * 0.1)) == 0
             options = optimoptions('patternsearch', 'Display', 'off');
-            [positionPS, fitness] = patternsearch(fobj, bestPosition, [], [], [], [], [], [], [], options);
+            [positionPS, fitnessPS] = patternsearch(fobj, bestPosition, [], [], [], [], [], [], [], options);
 
-            if fitness < bestFitness
-                bestFitness = fitness;
+            if fitnessPS < bestFitness
+                bestFitness = fitnessPS;
                 bestPosition = positionPS;
             end
 
         end
 
-        iter = iter + 1;
-        convergenceCurve(iter) = bestFitness;
-
-    end
-
-end
-
-% This function initialize the first population of search agents
-function positions = initialization(searchAgentsNum, dim, ub, lb)
-
-    boundaryNum = size(ub, 2); % number of boundaries
-
-    % If the boundaries of all variables are equal and user enter a signle
-    % number for both ub and lb
-    if boundaryNum == 1
-        positions = rand(searchAgentsNum, dim) .* (ub - lb) + lb;
-    end
-
-    % If each variable has a different lb and ub
-    if boundaryNum > 1
-
-        for i = 1:dim
-            ub_i = ub(i);
-            lb_i = lb(i);
-            positions(:, i) = rand(searchAgentsNum, 1) .* (ub_i - lb_i) + lb_i;
-        end
+        t = t + 1;
+        convergenceCurve(t) = bestFitness;
 
     end
 

@@ -1,90 +1,74 @@
-function [bestf, bestx, BestCost] = DE(nPop, MaxIt, VarMin, VarMax, nVar, CostFunction)
-    %% DE Parameters
+function [bestFitness, bestPosition, convergenceCurve] = DE(searchAgentsNum, maxFes, lb, ub, dim, fobj)
+    % Initialize position vector and fitness for the best
+    bestFitness = inf;
+    bestPosition = zeros(1, dim);
 
-    % nVar= Number of Decision Variables
-    VarSize = [1 nVar]; % Decision Variables Matrix Size
-    % VarMin=Lower Bound of Decision Variables
-    % VarMax= Upper Bound of Decision Variables
-    % MaxIt= Maximum Number of Iterations
-    % nPop= Population Size
-    beta_min = 0.2; % Lower Bound of Scaling Factor
-    beta_max = 0.8; % Upper Bound of Scaling Factor
-    pCR = 0.2; % Crossover Probability
-    %% Initialization
-    empty_individual.Position = [];
-    empty_individual.Cost = [];
-    BestSol.Cost = inf;
-    pop = repmat(empty_individual, nPop, 1);
+    % Initialize the positions of search agents
+    positions = initialization(searchAgentsNum, dim, ub, lb);
+    convergenceCurve = [];
+    fitness = [];
 
-    for i = 1:nPop
-        pop(i).Position = unifrnd(VarMin, VarMax, VarSize);
+    F = 0.5; % Scaling factor
+    CR = 0.9; % Crossover probability
+    fe = 0;
+    t = 0;
 
-        pop(i).Cost = CostFunction(pop(i).Position);
+    while fe < maxFes
 
-        if pop(i).Cost < BestSol.Cost
-            BestSol = pop(i);
+        for i = 1:size(positions, 1)
+            % Check boundries
+            FU = positions(i, :) > ub;
+            FL = positions(i, :) < lb;
+            positions(i, :) = (positions(i, :) .* (~(FU + FL))) + ub .* FU + lb .* FL;
+            % Fitness of locations
+            fitness(i) = fobj(positions(i, :));
+            fe = fe + 1;
+
+            if fitness(i) < bestFitness
+                bestFitness = fitness(i);
+                bestPosition = positions(i, :);
+            end
+
         end
 
-    end
-
-    BestCost = zeros(MaxIt, 1);
-    %% DE Main Loop
-    for it = 1:MaxIt
-
-        for i = 1:nPop
-
-            x = pop(i).Position;
-
-            A = randperm(nPop);
-
-            A(A == i) = [];
-
-            a = A(1);
-            b = A(2);
-            c = A(3);
+        for i = 1:size(positions, 1)
+            % Select three random indices
+            indices = randperm(searchAgentsNum, 3);
+            a = positions(indices(1), :);
+            b = positions(indices(2), :);
+            c = positions(indices(3), :);
 
             % Mutation
-            %beta=unifrnd(beta_min,beta_max);
-            beta = unifrnd(beta_min, beta_max, VarSize);
-            y = pop(a).Position + beta .* (pop(b).Position - pop(c).Position);
-            y = max(y, VarMin);
-            y = min(y, VarMax);
+            mutant = a + F * (b - c);
+            mutant = max(min(mutant, ub), lb); % Ensure within bounds
 
             % Crossover
-            z = zeros(size(x));
-            j0 = randi([1 numel(x)]);
+            trial = positions(i, :);
+            j_rand = randi(dim); % Random index for crossover
 
-            for j = 1:numel(x)
+            for j = 1:dim
 
-                if j == j0 || rand <= pCR
-                    z(j) = y(j);
-                else
-                    z(j) = x(j);
+                if rand < CR || j == j_rand
+                    trial(j) = mutant(j);
                 end
 
             end
 
-            NewSol.Position = z;
-            NewSol.Cost = CostFunction(NewSol.Position);
+            % Selection
+            trialFitness = fobj(trial);
+            fe = fe + 1;
 
-            if NewSol.Cost < pop(i).Cost
-                pop(i) = NewSol;
-
-                if pop(i).Cost < BestSol.Cost
-                    BestSol = pop(i);
-                end
-
+            if trialFitness < fitness(i)
+                positions(i, :) = trial;
+                fitness(i) = trialFitness;
+                fe = fe + 1;
             end
 
         end
 
-        % Update Best Cost
-        BestCost(it) = BestSol.Cost;
+        t = t + 1;
+        convergenceCurve(t) = bestFitness;
 
     end
 
-    %% Show Results
-
-    bestx = BestSol.Position;
-    bestf = BestCost(end);
 end

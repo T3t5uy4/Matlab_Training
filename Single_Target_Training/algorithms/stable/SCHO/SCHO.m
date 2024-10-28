@@ -1,9 +1,9 @@
-function [Destination_fitness, Destination_position, Convergence_curve] = SCHO(N, Max_iteration, lb, ub, dim, fobj)
+function [bestFitness, bestPosition, convergenceCurve] = SCHO(N, maxFes, lb, ub, dim, fobj)
 
-    Destination_position = zeros(1, dim);
-    Destination_fitness = inf;
-    Destination_position_second = zeros(1, dim);
-    Convergence_curve = zeros(1, Max_iteration);
+    bestPosition = zeros(1, dim);
+    bestFitness = inf;
+    bestPosition_second = zeros(1, dim);
+    convergenceCurve = zeros(1, maxFes);
     Position_sort = zeros(N, dim);
     %Initialize SCHO parameters
     u = 0.388;
@@ -13,9 +13,9 @@ function [Destination_fitness, Destination_position, Convergence_curve] = SCHO(N
     q = 9;
     Alpha = 4.6;
     Beta = 1.55;
-    BS = floor(Max_iteration / Beta);
+    BS = floor(maxFes / Beta);
     ct = 3.6;
-    T = floor(Max_iteration / ct);
+    T = floor(maxFes / ct);
     BSi = 0;
     BSi_temp = 0;
     ub_2 = ub;
@@ -27,30 +27,30 @@ function [Destination_fitness, Destination_position, Convergence_curve] = SCHO(N
     for i = 1:size(X, 1)
         Objective_values(1, i) = fobj(X(i, :));
 
-        if Objective_values(1, i) < Destination_fitness
-            Destination_position = X(i, :);
-            Destination_fitness = Objective_values(1, i);
+        if Objective_values(1, i) < bestFitness
+            bestPosition = X(i, :);
+            bestFitness = Objective_values(1, i);
         end
 
     end
 
-    Convergence_curve(1) = Destination_fitness;
+    convergenceCurve(1) = bestFitness;
     t = 2;
     %Main loop
-    while t <= Max_iteration
+    while t <= maxFes
 
         for i = 1:size(X, 1) % in i-th solution
 
             for j = 1:size(X, 2) % in j-th dimension
                 %update A by using Eq. (17)
-                cosh2 = (exp(t / Max_iteration) + exp(-t / Max_iteration)) / 2;
-                sinh2 = (exp(t / Max_iteration) - exp(-t / Max_iteration)) / 2;
+                cosh2 = (exp(t / maxFes) + exp(-t / maxFes)) / 2;
+                sinh2 = (exp(t / maxFes) - exp(-t / maxFes)) / 2;
                 r1 = rand();
-                A = (p - q * (t / Max_iteration) ^ (cosh2 / (sinh2))) * r1;
+                A = (p - q * (t / maxFes) ^ (cosh2 / (sinh2))) * r1;
                 % enter the bounded search strategy
                 if t == BSi
-                    ub_2 = Destination_position(j) + (1 - t / Max_iteration) * abs(Destination_position(j) - Destination_position_second(j));
-                    lb_2 = Destination_position(j) - (1 - t / Max_iteration) * abs(Destination_position(j) - Destination_position_second(j));
+                    ub_2 = bestPosition(j) + (1 - t / maxFes) * abs(bestPosition(j) - bestPosition_second(j));
+                    lb_2 = bestPosition(j) - (1 - t / maxFes) * abs(bestPosition(j) - bestPosition_second(j));
 
                     if ub_2 > ub
                         ub_2 = ub;
@@ -69,7 +69,7 @@ function [Destination_fitness, Destination_position, Convergence_curve] = SCHO(N
                 if t <= T %3.6-3.62
                     r2 = rand();
                     r3 = rand();
-                    a1 = 3 * (-1.3 * t / Max_iteration + m);
+                    a1 = 3 * (-1.3 * t / maxFes + m);
                     r4 = rand();
                     r5 = rand();
 
@@ -79,9 +79,9 @@ function [Destination_fitness, Destination_position, Convergence_curve] = SCHO(N
                         W1 = r2 * a1 * (cosh + u * sinh - 1);
 
                         if r5 <= 0.5
-                            X(i, j) = Destination_position(j) + r4 * W1 * X(i, j);
+                            X(i, j) = bestPosition(j) + r4 * W1 * X(i, j);
                         else
-                            X(i, j) = Destination_position(j) - r4 * W1 * X(i, j);
+                            X(i, j) = bestPosition(j) - r4 * W1 * X(i, j);
                         end
 
                     else
@@ -90,9 +90,9 @@ function [Destination_fitness, Destination_position, Convergence_curve] = SCHO(N
                         W3 = r2 * a1 * (cosh + u * sinh);
 
                         if r5 <= 0.5
-                            X(i, j) = Destination_position(j) + r4 * W3 * X(i, j);
+                            X(i, j) = bestPosition(j) + r4 * W3 * X(i, j);
                         else
-                            X(i, j) = Destination_position(j) - r4 * W3 * X(i, j);
+                            X(i, j) = bestPosition(j) - r4 * W3 * X(i, j);
                         end
 
                     end
@@ -101,7 +101,7 @@ function [Destination_fitness, Destination_position, Convergence_curve] = SCHO(N
                     % the second phase of exploration and exploitation
                     r2 = rand();
                     r3 = rand();
-                    a2 = 2 * (-t / Max_iteration + n);
+                    a2 = 2 * (-t / maxFes + n);
                     W2 = r2 * a2;
                     r4 = rand();
                     r5 = rand();
@@ -109,13 +109,13 @@ function [Destination_fitness, Destination_position, Convergence_curve] = SCHO(N
                     if A < 1
                         sinh = (exp(r3) - exp(-r3)) / 2;
                         cosh = (exp(r3) + exp(-r3)) / 2;
-                        X(i, j) = X(i, j) + (r5 * sinh / cosh * abs(W2 * Destination_position(j) - X(i, j)));
+                        X(i, j) = X(i, j) + (r5 * sinh / cosh * abs(W2 * bestPosition(j) - X(i, j)));
                     else
 
                         if r4 <= 0.5
-                            X(i, j) = X(i, j) + (abs(0.003 * W2 * Destination_position(j) - X(i, j)));
+                            X(i, j) = X(i, j) + (abs(0.003 * W2 * bestPosition(j) - X(i, j)));
                         else
-                            X(i, j) = X(i, j) + (-abs(0.003 * W2 * Destination_position(j) - X(i, j)));
+                            X(i, j) = X(i, j) + (-abs(0.003 * W2 * bestPosition(j) - X(i, j)));
                         end
 
                     end
@@ -135,9 +135,9 @@ function [Destination_fitness, Destination_position, Convergence_curve] = SCHO(N
             % Calculate the objective values
             Objective_values(1, i) = fobj(X(i, :));
             %         % Update the destination if there is a better solution
-            if Objective_values(1, i) < Destination_fitness
-                Destination_position = X(i, :);
-                Destination_fitness = Objective_values(1, i);
+            if Objective_values(1, i) < bestFitness
+                bestPosition = X(i, :);
+                bestFitness = Objective_values(1, i);
             end
 
         end
@@ -145,7 +145,7 @@ function [Destination_fitness, Destination_position, Convergence_curve] = SCHO(N
         %find the second solution
         if t == BS
             BSi = BS + 1;
-            BS = BS + floor((Max_iteration - BS) / Alpha);
+            BS = BS + floor((maxFes - BS) / Alpha);
             temp = zeros(1, dim);
             temp2 = zeros(N, dim);
             %sorting
@@ -166,9 +166,9 @@ function [Destination_fitness, Destination_position, Convergence_curve] = SCHO(N
 
             end
 
-            Destination_position_second = Position_sort(2, :); %the second solution
+            bestPosition_second = Position_sort(2, :); %the second solution
         end
 
-        Convergence_curve(t) = Destination_fitness;
+        convergenceCurve(t) = bestFitness;
         t = t + 1;
     end

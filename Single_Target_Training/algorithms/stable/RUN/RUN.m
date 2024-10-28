@@ -1,12 +1,12 @@
-function [bestFitness, bestPosition, Convergence_curve] = RUN(searchAgentNum, maxIters, lb, ub, dim, fobj)
+function [bestFitness, bestPosition, Convergence_curve] = RUN(searchAgentsNum, maxIters, lb, ub, dim, fobj)
 
-    Cost = zeros(searchAgentNum, 1); % Record the Fitness of all Solutions
-    X = initialization(searchAgentNum, dim, ub, lb); % Initialize the set of random solutions
+    Cost = zeros(searchAgentsNum, 1); % Record the Fitness of all Solutions
+    X = initialization(searchAgentsNum, dim, ub, lb); % Initialize the set of random solutions
     Xnew2 = zeros(1, dim);
 
     Convergence_curve = zeros(1, maxIters);
 
-    for i = 1:searchAgentNum
+    for i = 1:searchAgentsNum
         Cost(i) = fobj(X(i, :)); % Calculate the Value of Objective Function
     end
 
@@ -22,13 +22,13 @@ function [bestFitness, bestPosition, Convergence_curve] = RUN(searchAgentNum, ma
         it = it + 1;
         f = 20 .* exp(- (12 .* (it / maxIters))); % (Eq.17.6)
         Xavg = mean(X); % Determine the Average of Solutions
-        SF = 2 .* (0.5 - rand(1, searchAgentNum)) .* f; % Determine the Adaptive Factor (Eq.17.5)
+        SF = 2 .* (0.5 - rand(1, searchAgentsNum)) .* f; % Determine the Adaptive Factor (Eq.17.5)
 
-        for i = 1:searchAgentNum
+        for i = 1:searchAgentsNum
             [~, ind_l] = min(Cost);
             lBest = X(ind_l, :);
 
-            [A, B, C] = RndX(searchAgentNum, i); % Determine Three Random Indices of Solutions
+            [A, B, C] = RndX(searchAgentsNum, i); % Determine Three Random Indices of Solutions
             [~, ind1] = min(Cost([A B C]));
 
             % Determine Delta X (Eqs. 11.1 to 11.3)
@@ -82,7 +82,7 @@ function [bestFitness, bestPosition, Convergence_curve] = RUN(searchAgentNum, ma
                 u = 2 * rand(1, dim);
                 w = Unifrnd(0, 2, 1, dim) .* EXP; %(Eq.19-1)
 
-                [A, B, C] = RndX(searchAgentNum, i);
+                [A, B, C] = RndX(searchAgentsNum, i);
                 Xavg = (X(A, :) + X(B, :) + X(C, :)) / 3; %(Eq.19-2)
 
                 beta = rand(1, dim);

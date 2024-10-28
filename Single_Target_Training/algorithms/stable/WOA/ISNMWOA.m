@@ -1,50 +1,53 @@
 % The Whale Optimization Algorithm
-function [Leader_score, Leader_pos, Convergence_curve] = ISNMWOA(SearchAgents_no, MaxFEs, lb, ub, dim, fobj)
-    Leader_pos = zeros(1, dim);
-    Leader_score = inf;
+function [bestFitness, bestPosition, convergenceCurve] = ISNMWOA(searchAgentsNum, maxFes, lb, ub, dim, fobj)
+    bestPosition = zeros(1, dim);
+    bestFitness = inf;
     J = 1/3;
     alpha = 0.5;
-    Positions = initialization(SearchAgents_no, dim, ub, lb);
+    positions = initialization(searchAgentsNum, dim, ub, lb);
     lb = ones(1, dim) .* lb;
     ub = ones(1, dim) .* ub;
-    Convergence_curve = [];
-    FEs = 0;
+    convergenceCurve = [];
+    fitness = [];
+    fe = 0;
     t = 1;
 
-    while FEs < MaxFEs
+    while fe < maxFes
 
-        for i = 1:size(Positions, 1)
-            Flag4ub = Positions(i, :) > ub;
-            Flag4lb = Positions(i, :) < lb;
-            Positions(i, :) = (Positions(i, :) .* (~(Flag4ub + Flag4lb))) + ub .* Flag4ub + lb .* Flag4lb;
-            fitness = fobj(Positions(i, :));
-            FEs = FEs + 1;
+        for i = 1:size(positions, 1)
+            % Check boundries
+            FU = positions(i, :) > ub;
+            FL = positions(i, :) < lb;
+            positions(i, :) = (positions(i, :) .* (~(FU + FL))) + ub .* FU + lb .* FL;
+            % Fitness of locations
+            fitness(i) = fobj(positions(i, :));
+            fe = fe + 1;
 
-            if fitness < Leader_score
-                Leader_score = fitness;
-                Leader_pos = Positions(i, :);
+            if fitness(i) < bestFitness
+                bestFitness = fitness(i);
+                bestPosition = positions(i, :);
             end
 
         end
 
-        for i = 1:round(SearchAgents_no)
+        for i = 1:round(searchAgentsNum)
             p = rand;
-            indexJ = randi(SearchAgents_no);
+            indexJ = randi(searchAgentsNum);
 
             if p < J
-                Positions(i, :) = Positions(i, :) +0.01 .* (Positions(indexJ, :) .* Levy(dim) - Positions(i, :));
+                positions(i, :) = positions(i, :) +0.01 .* (positions(indexJ, :) .* Levy(dim) - positions(i, :));
             elseif p < (1 - J)
-                Positions(i, :) = Positions(i, :) + alpha .* (Positions(indexJ, :) - Positions(i, :) .* Levy(dim));
+                positions(i, :) = positions(i, :) + alpha .* (positions(indexJ, :) - positions(i, :) .* Levy(dim));
             else
-                Positions(i, :) = Positions(i, :) + alpha .* (Positions(indexJ, :) - Positions(i, :)) .* Levy(dim);
+                positions(i, :) = positions(i, :) + alpha .* (positions(indexJ, :) - positions(i, :)) .* Levy(dim);
             end
 
         end
 
-        a = 2 - FEs * ((2) / MaxFEs);
-        a2 = -1 + FEs * ((-1) / MaxFEs);
+        a = 2 - fe * ((2) / maxFes);
+        a2 = -1 + fe * ((-1) / maxFes);
 
-        for i = 1:size(Positions, 1)
+        for i = 1:size(positions, 1)
             r1 = rand();
             r2 = rand();
             A = 2 * a * r1 - a;
@@ -53,39 +56,39 @@ function [Leader_score, Leader_pos, Convergence_curve] = ISNMWOA(SearchAgents_no
             l = (a2 - 1) * rand + 1;
             p = rand();
 
-            for j = 1:size(Positions, 2)
+            for j = 1:size(positions, 2)
 
                 if p < 0.5
 
                     if abs(A) >= 1
-                        rand_leader_index = floor(SearchAgents_no * rand() + 1);
-                        X_rand = Positions(rand_leader_index, :);
-                        D_X_rand = abs(C * X_rand(j) - Positions(i, j));
-                        Positions(i, j) = X_rand(j) - A * D_X_rand;
+                        rand_leader_index = floor(searchAgentsNum * rand() + 1);
+                        X_rand = positions(rand_leader_index, :);
+                        D_X_rand = abs(C * X_rand(j) - positions(i, j));
+                        positions(i, j) = X_rand(j) - A * D_X_rand;
                     elseif abs(A) < 1
-                        D_Leader = abs(C * Leader_pos(j) - Positions(i, j));
-                        Positions(i, j) = Leader_pos(j) - A * D_Leader;
+                        D_Leader = abs(C * bestPosition(j) - positions(i, j));
+                        positions(i, j) = bestPosition(j) - A * D_Leader;
                     end
 
                 elseif p >= 0.5
-                    distance2Leader = abs(Leader_pos(j) - Positions(i, j));
-                    Positions(i, j) = distance2Leader * exp(b .* l) .* cos(l .* 2 * pi) + Leader_pos(j);
+                    distance2Leader = abs(bestPosition(j) - positions(i, j));
+                    positions(i, j) = distance2Leader * exp(b .* l) .* cos(l .* 2 * pi) + bestPosition(j);
                 end
 
             end
 
         end
 
-        options = optimset('MaxFunEvals', floor(MaxFEs * 0.1));
-        [x, fval, ~, output] = fminsearchbnd(fobj, Leader_pos, lb, ub, options);
+        options = optimset('MaxFunEvals', floor(maxFes * 0.1));
+        [x, fval, ~, output] = fminsearchbnd(fobj, bestPosition, lb, ub, options);
 
-        if fval < Leader_score
-            Leader_score = fval;
-            Leader_pos = x;
+        if fval < bestFitness
+            bestFitness = fval;
+            bestPosition = x;
         end
 
-        FEs = FEs + output.funcCount;
-        Convergence_curve(t) = Leader_score;
+        fe = fe + output.funcCount;
+        convergenceCurve(t) = bestFitness;
         t = t + 1;
     end
 

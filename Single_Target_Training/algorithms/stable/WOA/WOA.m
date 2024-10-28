@@ -1,16 +1,18 @@
 % The Whale optimization Algorithm
-function [bestFitness, bestPosition, convergenceCurve] = WOA(searchAgentsNum, maxIters, lb, ub, dim, fobj)
+function [bestFitness, bestPosition, convergenceCurve] = WOA(searchAgentsNum, maxFes, lb, ub, dim, fobj)
     % Initialize position vector and fitness for the best
     bestFitness = inf;
     bestPosition = zeros(1, dim);
 
     % Initialize the positions of search agents
     positions = initialization(searchAgentsNum, dim, ub, lb);
+    fitness = [];
     convergenceCurve = [];
 
-    iter = 0;
+    t = 0;
+    fe = 0;
 
-    while iter < maxIters
+    while fe < maxFes
 
         for i = 1:size(positions, 1)
             % Check boundries
@@ -18,17 +20,18 @@ function [bestFitness, bestPosition, convergenceCurve] = WOA(searchAgentsNum, ma
             FL = positions(i, :) < lb;
             positions(i, :) = (positions(i, :) .* (~(FU + FL))) + ub .* FU + lb .* FL;
             % Fitness of locations
-            fitness = fobj(positions(i, :));
+            fitness(i) = fobj(positions(i, :));
+            fe = fe + 1;
 
-            if fitness < bestFitness
-                bestFitness = fitness;
+            if fitness(i) < bestFitness
+                bestFitness = fitness(i);
                 bestPosition = positions(i, :);
             end
 
         end
 
-        a = 2 * (1 - iter / maxIters);
-        a2 = -1 - (iter / maxIters);
+        a = 2 * (1 - fe / maxFes);
+        a2 = -1 - (fe / maxFes);
         % Update the Whale's position
         for i = 1:size(positions, 1)
             r1 = rand;
@@ -64,8 +67,8 @@ function [bestFitness, bestPosition, convergenceCurve] = WOA(searchAgentsNum, ma
 
         end
 
-        iter = iter + 1;
-        convergenceCurve(iter) = bestFitness;
+        t = t + 1;
+        convergenceCurve(t) = bestFitness;
 
     end
 
