@@ -14,10 +14,11 @@ dim = 30;
 % Maximum number of iterations, recommended maximum training is 300,000
 maxFes = 3000;
 
-%% Algorithm
+%% Algorithm Select
 % Select the algorithm to be trained
 % Please do not select more than 13 algorithms
-algorithmName = {'DEAHHO_version1', 'HHO', 'DE_rand_1', 'HHODE_rand_1'};
+algorithmName = {'DEAHHO_version4', 'HHO', 'DE_best_1', 'DE_best_2', 'DE_current_1', 'DE_current_2', 'DE_currentToBest_1', 'DE_currentToBest_2', 'DE_rand_1', 'DE_rand_2', 'HHODE_best_1', 'HHODE_best_2', 'HHODE_current_1', 'HHODE_current_2', 'HHODE_currentToBest_1', 'HHODE_currentToBest_2', 'HHODE_rand_1', 'HHODE_rand_2'};
+remarkStr = 'DEAHHO_HHO_DE_HHODE';
 
 % Select training data set
 % 1-23 is the CEC05 function set
@@ -46,15 +47,15 @@ functionNameList = {'F82', 'F84', 'F85', 'F86', 'F87', 'F88', 'F89', 'F90', 'F91
 % functionNameList = {'F142', 'F143', 'F144', 'F145', 'F146', 'F147', 'F148', 'F149', 'F150', 'F151'};
 
 % Fold is recommended to be set to 30
-fold = 3;
+fold = 5;
 
 % Prepare output preprocessing
 % Get the current year, month, day, time and minute
 dateStr = datestr(now, 'yyyy-mm-dd');
-timeStr = datestr(now, 'HH_MM');
+timeStr = datestr(now, 'HH_MM_SS');
 % Set output directory name and file name
-algNameStr = strjoin(algorithmName, '_');
-dirName = ['output/', dateStr, '_', dataSetName, '_', algNameStr, '/', timeStr];
+algNameStr = algorithmName{1};
+dirName = ['output/', dateStr, '_', dataSetName, '_', algNameStr, '/', timeStr, '_', remarkStr];
 mkdir(dirName);
 fileName = [dirName, '/', timeStr];
 % Excel header definition
@@ -84,16 +85,17 @@ for functionNum = 1:size(functionNameList, 2)
     for cfold = 1:fold
         display(['fold', num2str(cfold), ' start']);
 
+        tic
+
         for cnum = 1:algorithmNum
-            tic
             algorithm = str2func(algorithmName{cnum});
             [~, ~, curve] = algorithm(searchAgentsNum, maxFes, lb, ub, dim, fobj);
             resultCurves(cnum, cfold, :) = uniformSampling(curve, numOfRecord);
             display(['The ', algorithmName{cnum}, '  algorithm is trained.']);
-            toc
         end
 
-        display(['fold', num2str(cfold), ' end']);
+        toc
+
     end
 
     % Write data to excel sheet
@@ -186,9 +188,9 @@ for functionNum = 1:size(functionNameList, 2)
 end
 
 Orderhao(xlsFileName);
-pValueToExcelhao(xlsFileName, fold);
-FridTest3(xlsFileName, fold)
-FridTest4(xlsFileName, fold)
+% pValueToExcelhao(xlsFileName, fold);
+% FridTest3(xlsFileName, fold)
+% FridTest4(xlsFileName, fold)
 
 display('This training is over!')
 close all

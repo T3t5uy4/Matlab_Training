@@ -6,11 +6,13 @@ function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version4(searchA
 
     % Initialize the positions of search agents
     positions = initialization(searchAgentsNum, dim, ub, lb);
+    fitness = [];
     convergenceCurve = [];
 
     fe = 0;
     t = 0;
-    keepRate = 0.0;
+    F = 0.5;
+    CR = 0.9;
 
     while fe < maxFes
 
@@ -20,11 +22,11 @@ function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version4(searchA
             FL = positions(i, :) < lb;
             positions(i, :) = (positions(i, :) .* (~(FU + FL))) + ub .* FU + lb .* FL;
             % Fitness of locations
-            fitness = fobj(positions(i, :));
+            fitness(i) = fobj(positions(i, :));
             fe = fe + 1;
 
-            if fitness < bestFitness
-                bestFitness = fitness;
+            if fitness(i) < bestFitness
+                bestFitness = fitness(i);
                 bestPosition = positions(i, :);
             end
 
