@@ -17,7 +17,7 @@ maxFes = 3000;
 %% Algorithm
 % Select the algorithm to be trained
 % Please do not select more than 13 algorithms
-algorithmName = {'DEAHHO_version1', 'HHO', 'DE'};
+algorithmName = {'DEAHHO_version1', 'HHO', 'DE_rand_1', 'HHODE_rand_1'};
 
 % Select training data set
 % 1-23 is the CEC05 function set
