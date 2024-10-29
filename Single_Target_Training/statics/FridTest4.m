@@ -1,104 +1,110 @@
-function  FridTest3( xlsfilename ,fold2)
-%UNTITLED ´Ë´¦ÏÔÊ¾ÓÐ¹Ø´Ëº¯ÊýµÄÕªÒª
-%   ´Ë´¦ÏÔÊ¾ÏêÏ¸ËµÃ÷
-readFilename=xlsfilename;     
-writeFilename=xlsfilename;
-[~,~,rawdata] = xlsread(xlsfilename,'overall');
-num = size(rawdata);
-flag = 0;
-cur = 1;
-for i = 2:num(1)
-    if flag == 0
-        fun(cur).name = cell2mat(rawdata(i,2));
-        cur = cur + 1; 
-    else
-        break;
+function FridTest3(xlsfilename, fold2)
+    %UNTITLED ï¿½Ë´ï¿½ï¿½ï¿½Ê¾ï¿½Ð¹Ø´Ëºï¿½ï¿½ï¿½ï¿½ï¿½ÕªÒª
+    %   ï¿½Ë´ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½Ï¸Ëµï¿½ï¿½
+    readFilename = xlsfilename;
+    writeFilename = xlsfilename;
+    [~, ~, rawdata] = xlsread(xlsfilename, 'overall');
+    num = size(rawdata);
+    flag = 0;
+    cur = 1;
+
+    for i = 2:num(1)
+
+        if flag == 0
+            fun(cur).name = cell2mat(rawdata(i, 2));
+            cur = cur + 1;
+        else
+            break;
+        end
+
+        if i + 1 <= num(1) && ~strcmp(rawdata(i, 1), rawdata(i + 1, 1))
+            flag = 1;
+        end
+
     end
-    if i+1<=num(1) && ~strcmp(rawdata(i,1),rawdata(i+1,1))
-        flag = 1;
+
+    function_num = (num(1) - 1) / (cur - 1);
+    algorithm_num = cur - 1;
+    fold = fold2;
+
+    meanranks = [];
+    Data = [];
+
+    for i = 1:function_num
+        tempData = xlsread(readFilename, ['F', num2str(i)], '', 'basic');
+        tempData = tempData(:, end); % %ï¿½ï¿½È¡ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½Ðµï¿½
+
+        for j = 1:algorithm_num
+            ttData(:, j) = tempData((j - 1) * fold + 1:j * fold, :);
+        end
+
+        Data = [Data; ttData];
     end
-end
 
-function_num = (num(1) - 1)/(cur - 1);         
-algorithm_num = cur - 1;         
-fold = fold2;                  
+    ans{1, 1} = 'algorithm_name';
+    % ans{2,1} = 'p';
+    ans{2, 1} = 'mean_level';
+    ans{3, 1} = 'rank';
 
-meanranks = [];
-Data = [];
-for i = 1:function_num
-    tempData = xlsread(readFilename, ['F', num2str(i)],'','basic');
-    tempData = tempData(:,end); %%»ñÈ¡¶ÔÓ¦º¯ÊýÖÐµÄ
-    
-    for j = 1:algorithm_num
-	    ttData(:,j) = tempData((j-1)*fold+1:j*fold,:);
+    x = Data;
+    [p, table, stat] = friedman(x);
+    mean_level = stat.meanranks;
+
+    [~, index] = sort(mean_level);
+
+    for i = 1:algorithm_num
+        ans{1, i + 1} = fun(i).name;
+        %     ans{2,i+1} = p(i);
+        ans{2, i + 1} = mean_level(i);
+
+        if i ~= 1 && mean_level(index(i)) == mean_level(index(i - 1))
+            ans{3, index(i) + 1} = ans{4, index(i - 1) + 1};
+        else
+            ans{3, index(i) + 1} = i;
+        end
+
     end
-    Data = [Data; ttData];
-end
-ans{1,1} = 'algorithm_name';
-% ans{2,1} = 'p';
-ans{2,1} = 'mean_level';
-ans{3,1} = 'rank';
 
-x =  Data;
-[p,table,stat] = friedman(x);
-mean_level = stat.meanranks;
-    
+    ans{1, algorithm_num + 2} = 'p';
+    ans{2, algorithm_num + 2} = p;
 
-[~,index] = sort(mean_level);
-for i = 1:algorithm_num
-    ans{1,i+1} = fun(i).name; 
-%     ans{2,i+1} = p(i);
-    ans{2,i+1} = mean_level(i);
-    if i~=1 && mean_level(index(i)) == mean_level(index(i-1))
-        ans{3 ,index(i)+1} = ans{4 ,index(i-1)+1};
-    else
-        ans{3, index(i) + 1} = i;
-    end
-    
-end
-ans{1,algorithm_num+2} = 'p';
-ans{2,algorithm_num+2} = p;
+    % for i = 1: function_num
+    % 	dealData = xlsread(readFilename,['F',num2str(i)],'','basic');
+    % 	dealData = dealData(:,end); %%ï¿½ï¿½È¡ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    %     for j = 1:algorithm_num
+    % 	    data(:,j) = dealData((j-1)*fold+1:j*fold,:);
+    % 	end
+    % 	x = data;
+    % 	[p(i),table,stat(i)] = friedman(x);
+    % 	meanranks = [meanranks;stat(i).meanranks];
+    % end
 
-
-% for i = 1: function_num
-% 	dealData = xlsread(readFilename,['F',num2str(i)],'','basic');
-% 	dealData = dealData(:,end); %%»ñÈ¡×îºóÒ»ÁÐÊý¾Ý
-%     for j = 1:algorithm_num
-% 	    data(:,j) = dealData((j-1)*fold+1:j*fold,:);
-% 	end
-% 	x = data;
-% 	[p(i),table,stat(i)] = friedman(x);
-% 	meanranks = [meanranks;stat(i).meanranks];
-% end
-
-
-%%meanranks
-% meanranks = [meanranks;mean(meanranks)];%%ÅÅÃû
-% for i = 1:algorithm_num
-% 	ans{1,i+1} = fun(i).name; 
-%     for j = 1:function_num+1
-%         ans{j+1,i+1} = meanranks(j,i);
-%     end
-% end
-% ans{1, algorithm_num + 2} = 'p';
-% ans{1,1} = 'F';
-% 
-% for i = 1:function_num
-%     ans{i+1,1} = cell2mat(rawdata((i - 1)*(cur - 1) +2,1));
-%     ans{i+1,algorithm_num + 2} = p(i);
-% end
-% 
-% ans{function_num+2, 1} = 'mean_level';
-% ans{function_num+3, 1} = 'Æ½¾ù½á¹û';
-% for i = 1:algorithm_num
-%     meanrank(i) = meanranks(function_num + 1,i);
-% end
-% [~,index] = sort(meanrank);
-% for i = 1:algorithm_num
-%    ans{function_num+3 ,index(i)+1} = i;
-%    if i>1 && meanrank(index(i)) == meanrank(index(i - 1))
-%        ans{function_num+3 ,index(i)+1} = ans{function_num+3 ,index(i-1)+1};
-%    end
-% end
-xlswrite(xlsfilename,ans,'ans');
-
+    %%meanranks
+    % meanranks = [meanranks;mean(meanranks)];%%ï¿½ï¿½ï¿½ï¿½
+    % for i = 1:algorithm_num
+    % 	ans{1,i+1} = fun(i).name;
+    %     for j = 1:function_num+1
+    %         ans{j+1,i+1} = meanranks(j,i);
+    %     end
+    % end
+    % ans{1, algorithm_num + 2} = 'p';
+    % ans{1,1} = 'F';
+    %
+    % for i = 1:function_num
+    %     ans{i+1,1} = cell2mat(rawdata((i - 1)*(cur - 1) +2,1));
+    %     ans{i+1,algorithm_num + 2} = p(i);
+    % end
+    %
+    % ans{function_num+2, 1} = 'mean_level';
+    % ans{function_num+3, 1} = 'Æ½ï¿½ï¿½ï¿½ï¿½ï¿½';
+    % for i = 1:algorithm_num
+    %     meanrank(i) = meanranks(function_num + 1,i);
+    % end
+    % [~,index] = sort(meanrank);
+    % for i = 1:algorithm_num
+    %    ans{function_num+3 ,index(i)+1} = i;
+    %    if i>1 && meanrank(index(i)) == meanrank(index(i - 1))
+    %        ans{function_num+3 ,index(i)+1} = ans{function_num+3 ,index(i-1)+1};
+    %    end
+    % end
+    xlswrite(xlsfilename, ans, 'ans');

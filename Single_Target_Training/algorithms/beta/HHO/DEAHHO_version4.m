@@ -97,66 +97,6 @@ function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version4(searchA
 
         end
 
-        % Sort positions as fobj
-        fobjPositions = [];
-
-        for i = 1:size(positions, 1)
-            fobjPositions(i) = fobj(positions(i, :));
-        end
-
-        [~, sortedIndices] = sort(fobjPositions);
-        sortedPositions = positions(sortedIndices, :);
-
-        % Divede the positions
-        partSize1 = floor(searchAgentsNum / 3 * (1 - fe / (maxFes * 3)));
-        partSize2 = floor(1 * searchAgentsNum / 3 * (1 + keepRate));
-
-        bestPart = sortedPositions(1:partSize1, :);
-        worstPart = sortedPositions(searchAgentsNum - partSize2 + 1:end, :);
-
-        % Update the best part
-        [bestPart, fe] = DEA(bestPart, dim, fobj, fe);
-
-        % Update the worst part
-        for i = 1:size(worstPart, 1)
-            worstPart(i, :) = worstPart(i, :) + (1 / (t + 1)) * (bestPosition - worstPart(i, :));
-        end
-
-        % Merge positions
-        mergedPositions = [bestPart; positions; worstPart];
-        fobjPositions = [];
-
-        for i = 1:size(mergedPositions, 1)
-            fobjPositions(i) = fobj(mergedPositions(i, :));
-        end
-
-        [~, sortedIndices] = sort(fobjPositions);
-        sortedPositions = mergedPositions(sortedIndices, :);
-        positions = sortedPositions(1:searchAgentsNum, :);
-        count = 0;
-
-        for i = 1:size(positions(1, :))
-
-            for j = 1:size(worstPart, 1)
-
-                if isequal(positions(i, :), worstPart(j, :))
-                    count = count + 1;
-                    break;
-                end
-
-            end
-
-        end
-
-        keepRate = count / partSize2;
-        fitness = fobj(positions(1, :));
-
-        if fitness < bestFitness
-            bestFitness = fitness;
-            bestPosition = positions(1, :);
-        end
-
-        fe = fe + 1;
         t = t + 1;
         convergenceCurve(t) = bestFitness;
 
