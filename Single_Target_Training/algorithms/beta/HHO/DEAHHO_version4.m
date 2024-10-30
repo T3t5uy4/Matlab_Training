@@ -97,7 +97,7 @@ function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version4(searchA
 
             end
 
-            p = floor(rand * 7) + 1;
+            p = floor(rand * 8) + 1;
 
             switch p
                 case 1

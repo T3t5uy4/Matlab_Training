@@ -12,13 +12,13 @@ numOfRecord = 40;
 % population dimension
 dim = 30;
 % Maximum number of iterations, recommended maximum training is 300,000
-maxFes = 3000;
+maxFes = 300000;
 
 %% Algorithm Select
 % Select the algorithm to be trained
 % Please do not select more than 13 algorithms
-algorithmName = {'DEAHHO_version4', 'HHO', 'DE_best_1', 'DE_best_2', 'DE_current_1', 'DE_current_2', 'DE_currentToBest_1', 'DE_currentToBest_2', 'DE_rand_1', 'DE_rand_2', 'HHODE_best_1', 'HHODE_best_2', 'HHODE_current_1', 'HHODE_current_2', 'HHODE_currentToBest_1', 'HHODE_currentToBest_2', 'HHODE_rand_1', 'HHODE_rand_2'};
-remarkStr = 'DEAHHO_HHO_DE_HHODE';
+algorithmName = {'exWOA_version1', 'LWOA', 'WOA'};
+remarkStr = 'exWOA_LWOA';
 
 % Select training data set
 % 1-23 is the CEC05 function set
@@ -47,7 +47,7 @@ functionNameList = {'F82', 'F84', 'F85', 'F86', 'F87', 'F88', 'F89', 'F90', 'F91
 % functionNameList = {'F142', 'F143', 'F144', 'F145', 'F146', 'F147', 'F148', 'F149', 'F150', 'F151'};
 
 % Fold is recommended to be set to 30
-fold = 5;
+fold = 3;
 
 % Prepare output preprocessing
 % Get the current year, month, day, time and minute
@@ -91,7 +91,7 @@ for functionNum = 1:size(functionNameList, 2)
             algorithm = str2func(algorithmName{cnum});
             [~, ~, curve] = algorithm(searchAgentsNum, maxFes, lb, ub, dim, fobj);
             resultCurves(cnum, cfold, :) = uniformSampling(curve, numOfRecord);
-            display(['The ', algorithmName{cnum}, '  algorithm is trained.']);
+            display([dataSetName, ':The ', algorithmName{cnum}, ' algorithm is trained.']);
         end
 
         toc
@@ -192,5 +192,5 @@ Orderhao(xlsFileName);
 % FridTest3(xlsFileName, fold)
 % FridTest4(xlsFileName, fold)
 
-display('This training is over!')
+display([dataSetName, ':', algNameStr, ' training is over!'])
 close all
