@@ -3,13 +3,13 @@
 %  Writer: Xu Chen
 %**************************************************************************************************
 
-function [D, gBest, convergence] = BLPSO(SearchAgents_no, Max_iteration, lb, ub, dim, fobj)
-    fobj = str2func(['cec14_func_', num2str(funcNum)]);
-
-    if size(ub, 2) == 1
+function [dim, gBest, convergence] = BLPSO(SearchAgents_no, Max_iteration, lb, ub, dim, fobj)
+    % fobj = str2func(['cec14_func_', num2str(funcNum)]);
+    
+     if size(ub, 2) == 1
         ub = ones(1, dim) * ub;
         lb = ones(1, dim) * lb;
-    end
+     end
 
     lu = [lb; ub];
 

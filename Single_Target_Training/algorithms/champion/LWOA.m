@@ -80,7 +80,7 @@ function [Leader_score, Leader_pos, Convergence_curve] = LWOA(SearchAgents_no, M
 
         %% Levy flight
         for i = 1:size(Positions, 1)
-            Positions(i, :) = Positions(i, :) + rand() * sign(rand() - 1/2) .* Levy1(dim);
+            Positions(i, :) = Positions(i, :) + rand() * sign(rand() -1/2) .* Levy1(dim);
 
             Flag4ub = Positions(i, :) > ub;
             Flag4lb = Positions(i, :) < lb;

@@ -60,16 +60,20 @@ function [bestFitness, bestPosition, convergenceCurve] = exWOA_version1(searchAg
 
                 elseif p >= 0.5
                     distanceToWhale = abs(bestPosition(j) - positions(i, j));
-                    positions(i, j) = distanceToWhale * exp(b .* l) .* cos(l .* 2 * pi) + bestPosition(j);
+
+                    if abs(A) >= 1
+                        positions(i, j) = distanceToWhale * exp(b .* l) .* sin(l .* 2 * pi) + bestPosition(j);
+                    elseif abs(A) < 1
+                        positions(i, j) = distanceToWhale * exp(b .* l) .* cos(l .* 2 * pi) + bestPosition(j);
+                    end
+
                 end
 
             end
 
-            if abs(A) >= 1
-                positions(i, :) = positions(i, :) .* Levy(dim);
-            end
-
         end
+
+        positions(i, :) = positions(i, :) .* Levy(dim);
 
         t = t + 1;
         convergenceCurve(t) = bestFitness;

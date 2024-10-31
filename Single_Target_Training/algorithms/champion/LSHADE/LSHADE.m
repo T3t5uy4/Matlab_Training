@@ -162,8 +162,8 @@ function [lu, bsf_solution, cg_curve] = LSHADE(N, Max_FEs, lb, ub, dim, fobj)
         end
 
         %%%%%%%%%%%%%%%%%%%%%%%% for out
-        size(fitness)
-        size(children_fitness)
+        % size(fitness)
+        % size(children_fitness)
         dif = abs(fitness - children_fitness);
 
         %% I == 1: the parent is better; I == 2: the offspring is better

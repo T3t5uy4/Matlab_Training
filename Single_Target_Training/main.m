@@ -17,8 +17,8 @@ maxFes = 300000;
 %% Algorithm Select
 % Select the algorithm to be trained
 % Please do not select more than 13 algorithms
-algorithmName = {'exWOA_version1', 'LWOA', 'WOA'};
-remarkStr = 'exWOA_LWOA';
+algorithmName = {'exWOA_version1', 'WOA', 'WOA'};
+remarkStr = 'exWOA_LWOA_WOA';
 
 % Select training data set
 % 1-23 is the CEC05 function set
@@ -38,7 +38,8 @@ remarkStr = 'exWOA_LWOA';
 % functionNameList = {'F52', 'F53', 'F54', 'F55', 'F56', 'F57', 'F58', 'F59', 'F60', 'F61', 'F62', 'F63', 'F64', 'F65', 'F66', 'F67', 'F68', 'F69', 'F70', 'F71', 'F72', 'F73', 'F74', 'F75', 'F76', 'F77', 'F78', 'F79', 'F80', 'F81'};
 % CEC2017
 dataSetName = 'CEC17';
-functionNameList = {'F82', 'F84', 'F85', 'F86', 'F87', 'F88', 'F89', 'F90', 'F91', 'F92', 'F93', 'F94', 'F95', 'F96', 'F97', 'F98', 'F99', 'F100', 'F101', 'F102', 'F103', 'F104', 'F105', 'F106', 'F107', 'F108', 'F109', 'F110', 'F111'};
+functionNameList = {'F14', 'F15'};
+% functionNameList = {'F82', 'F84', 'F85', 'F86', 'F87', 'F88', 'F89', 'F90', 'F91', 'F92', 'F93', 'F94', 'F95', 'F96', 'F97', 'F98', 'F99', 'F100', 'F101', 'F102', 'F103', 'F104', 'F105', 'F106', 'F107', 'F108', 'F109', 'F110', 'F111'};
 % CEC 2018
 % dataSetName = 'CEC18';
 % functionNameList = {'F112', 'F114', 'F115', 'F116', 'F117', 'F118', 'F119', 'F120', 'F121', 'F122', 'F123', 'F124', 'F125', 'F126', 'F127', 'F128', 'F129', 'F130', 'F131', 'F132', 'F133', 'F134', 'F135', 'F136', 'F137', 'F138', 'F139', 'F140', 'F141'};
@@ -77,24 +78,23 @@ markers = repmat(basicMarkers, ceil(nLines / numel(basicMarkers)), 1);
 for functionNum = 1:size(functionNameList, 2)
     functionName = functionNameList{functionNum};
     [lb, ub, dim, fobj] = getFunctions(functionName, dim);
-    display(['----------------', functionName, '----------------']);
+    disp(['----------------', functionName, '----------------']);
     functionName = ['F', num2str(functionNum)];
     % Benchmark function
     resultCurves = zeros(algorithmNum, fold, numOfRecord);
 
     for cfold = 1:fold
-        display(['fold', num2str(cfold), ' start']);
-
-        tic
+        disp(['fold', num2str(cfold), ' start']);
 
         for cnum = 1:algorithmNum
+            tic
             algorithm = str2func(algorithmName{cnum});
             [~, ~, curve] = algorithm(searchAgentsNum, maxFes, lb, ub, dim, fobj);
             resultCurves(cnum, cfold, :) = uniformSampling(curve, numOfRecord);
-            display([dataSetName, ':The ', algorithmName{cnum}, ' algorithm is trained.']);
-        end
+            disp([dataSetName, ':The ', algorithmName{cnum}, ' algorithm is trained.']);
 
-        toc
+            toc
+        end
 
     end
 
@@ -192,5 +192,5 @@ Orderhao(xlsFileName);
 % FridTest3(xlsFileName, fold)
 % FridTest4(xlsFileName, fold)
 
-display([dataSetName, ':', algNameStr, ' training is over!'])
+disp([dataSetName, ':', algNameStr, ' training is over!'])
 close all
