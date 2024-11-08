@@ -10,6 +10,7 @@ function [bestFitness, bestPosition, convergenceCurve] = MWOA(searchAgentsNum, m
     convergenceCurve = [];
 
     fe = 0;
+    t = 0;
 
     while fe < maxFes
 

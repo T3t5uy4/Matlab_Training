@@ -7,7 +7,7 @@
 %**************************************************************************************************
 
 function [lb, ub, convergence] = ALCPSO(SearchAgents_no, Max_iteration, lb, ub, dim, fobj, funcNum)
-    fobj = str2func(['cec14_func_', num2str(funcNum)]);
+    % fobj = str2func(['cec14_func_', num2str(funcNum)]);
 
     if size(ub, 2) == 1
         ub = ones(1, dim) * ub;

@@ -44,27 +44,21 @@ function [bestFitness, bestPosition, convergenceCurve] = exWOA_version1(searchAg
             l = (a2 - 1) * rand + 1;
             p = rand;
 
-            for j = 1:size(positions, 2)
+            if abs(A) > 1
+                positions(i, :) = positions(i, :) .* Levy(dim) + C * (bestPosition - rand * ones(1, dim));
+            elseif abs(A) <= 1
 
-                if p < 0.5
+                for j = 1:size(positions, 2)
 
-                    if abs(A) >= 1
-                        randWhaleIdx = floor(searchAgentsNum * rand + 1);
-                        randPosition = positions(randWhaleIdx, :);
-                        randPositionD = abs(C * randPosition(j) - positions(i, j));
-                        positions(i, j) = randPosition(j) - A * randPositionD;
-                    elseif abs(A) < 1
+                    if p < 0.5
+
                         positionD = abs(C * bestPosition(j) - positions(i, j));
                         positions(i, j) = bestPosition(j) - A * positionD;
-                    end
 
-                elseif p >= 0.5
-                    distanceToWhale = abs(bestPosition(j) - positions(i, j));
-
-                    if abs(A) >= 1
-                        positions(i, j) = distanceToWhale * exp(b .* l) .* sin(l .* 2 * pi) + bestPosition(j);
-                    elseif abs(A) < 1
+                    elseif p >= 0.5
+                        distanceToWhale = abs(bestPosition(j) - positions(i, j));
                         positions(i, j) = distanceToWhale * exp(b .* l) .* cos(l .* 2 * pi) + bestPosition(j);
+
                     end
 
                 end
@@ -72,8 +66,6 @@ function [bestFitness, bestPosition, convergenceCurve] = exWOA_version1(searchAg
             end
 
         end
-
-        positions(i, :) = positions(i, :) .* Levy(dim);
 
         t = t + 1;
         convergenceCurve(t) = bestFitness;
