@@ -1,2 +1,0 @@
-
-isOutput = false;
