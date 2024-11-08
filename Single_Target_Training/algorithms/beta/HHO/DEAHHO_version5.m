@@ -1,5 +1,5 @@
 % The Harris hawks optimization Algorithm
-function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version4(searchAgentsNum, maxFes, lb, ub, dim, fobj)
+function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version5(searchAgentsNum, maxFes, lb, ub, dim, fobj)
     % Initialize position vector and fitness for the best
     bestFitness = inf;
     bestPosition = zeros(1, dim);
@@ -9,10 +9,10 @@ function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version4(searchA
     fitness = [];
     convergenceCurve = [];
 
-    fe = 0;
     t = 0;
-    F = 0.5;
-    CR = 0.9;
+    fe = 0;
+    F = 0.5; % Scaling factor
+    CR = 0.9; % Crossover probability
 
     while fe < maxFes
 
@@ -47,8 +47,8 @@ function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version4(searchA
                     % Perch based on other family members
                     positions(i, :) = randPosition - rand * abs(randPosition - 2 * rand * positions(i, :));
                 elseif q >= 0.5
-                    positions(i, :) = bestPosition - mean(positions) - rand * ((ub - lb) * rand + lb);
                     % Perch on a random tall tree (random site inside group's home range)
+                    positions(i, :) = bestPosition - mean(positions) - rand * ((ub - lb) * rand + lb);
                 end
 
             elseif abs(E) < 1 % Development stage
@@ -62,317 +62,119 @@ function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version4(searchA
                 elseif r < 0.5 && abs(E) >= 0.5 % Soft besiege with motions
                     jumpStrength = 2 * (1 - rand); % Random jump strength
                     position1 = bestPosition - E * abs(jumpStrength * bestPosition - positions(i, :));
+                    fitness1 = fobj(position1);
+                    fe = fe + 1;
 
-                    if fobj(position1) < fobj(positions(i, :))
+                    if fitness1 < fitness(i)
+                        fitness(i) = fitness1;
                         positions(i, :) = position1;
                     else
                         position2 = bestPosition - E * abs(jumpStrength * bestPosition - positions(i, :)) + rand(1, dim) .* Levy(dim);
+                        fitness2 = fobj(position2);
+                        fe = fe + 1;
 
-                        if fobj(position2) < fobj(positions(i, :))
+                        if fitness2 < fitness(i)
+                            fitness(i) = fitness2;
                             positions(i, :) = position2;
                         end
 
                     end
-
-                    fe = fe + 1;
 
                 elseif r < 0.5 && abs(E) < 0.5 % Hard besiege with motions
                     jumpStrength = 2 * (1 - rand); % Random jump strength
                     position1 = bestPosition - E * abs(jumpStrength * bestPosition - mean(positions));
+                    fitness1 = fobj(position1);
+                    fe = fe + 1;
 
-                    if fobj(position1) < fobj(positions(i, :))
+                    if fitness1 < fitness(i)
+                        fitness(i) = fitness1;
                         positions(i, :) = position1;
                     else
                         position2 = bestPosition - E * abs(jumpStrength * bestPosition - mean(positions)) + rand(1, dim) .* Levy(dim);
+                        fitness2 = fobj(position2);
+                        fe = fe + 1;
 
-                        if fobj(position2) < fobj(positions(i, :))
+                        if fitness2 < fitness(i)
+                            fitness(i) = fitness2;
                             positions(i, :) = position2;
                         end
 
                     end
-
-                    fe = fe + 1;
 
                 end
 
             end
 
-            p = floor(rand * 8) + 1;
+            r = rand;
+            p1 = (1 - fe / maxFes) / 2;
+            p2 = (1 - p1) * (fe / maxFes) / 2;
 
-            switch p
-                case 1
+            if r < p1
+                % DE_rand
+                % Select three random indices
+                indices = randperm(searchAgentsNum, 3);
+                positionRand1 = positions(indices(1), :);
+                positionRand2 = positions(indices(2), :);
+                positionRand3 = positions(indices(3), :);
 
-                    % Select three random indices
-                    indices = randperm(searchAgentsNum, 2);
-                    positionRand1 = positions(indices(1), :);
-                    positionRand2 = positions(indices(2), :);
+                % Mutation
+                mutant = positionRand1 + F * (positionRand2 - positionRand3);
+                mutant = max(min(mutant, ub), lb); % Ensure within bounds
 
-                    % Mutation
-                    mutant = bestPosition + F * (positionRand1 - positionRand2);
-                    mutant = max(min(mutant, ub), lb); % Ensure within bounds
+                % Crossover
+                trial = positions(i, :);
+                j_rand = randi(dim); % Random index for crossover
 
-                    % Crossover
-                    trial = positions(i, :);
-                    j_rand = randi(dim); % Random index for crossover
+                for j = 1:dim
 
-                    for j = 1:dim
-
-                        if rand < CR || j == j_rand
-                            trial(j) = mutant(j);
-                        end
-
+                    if rand < CR || j == j_rand
+                        trial(j) = mutant(j);
                     end
 
-                    % Selection
-                    trialFitness = fobj(trial);
+                end
+
+                % Selection
+                trialFitness = fobj(trial);
+                fe = fe + 1;
+
+                if trialFitness < fitness(i)
+                    positions(i, :) = trial;
+                    fitness(i) = trialFitness;
                     fe = fe + 1;
+                end
 
-                    if trialFitness < fitness(i)
-                        positions(i, :) = trial;
-                        fitness(i) = trialFitness;
-                        fe = fe + 1;
+            elseif r < p1 + p2
+                % DE_currentToBest
+                % Select three random indices
+                indices = randperm(searchAgentsNum, 2);
+                positionRand1 = positions(indices(1), :);
+                positionRand2 = positions(indices(2), :);
+
+                % Mutation
+                mutant = positions(i, :) + F * (bestPosition - positions(i, :)) + F * (positionRand1 - positionRand2);
+                mutant = max(min(mutant, ub), lb); % Ensure within bounds
+
+                % Crossover
+                trial = positions(i, :);
+                j_rand = randi(dim); % Random index for crossover
+
+                for j = 1:dim
+
+                    if rand < CR || j == j_rand
+                        trial(j) = mutant(j);
                     end
 
-                case 2
+                end
 
-                    % Select three random indices
-                    indices = randperm(searchAgentsNum, 4);
-                    positionRand1 = positions(indices(1), :);
-                    positionRand2 = positions(indices(2), :);
-                    positionRand3 = positions(indices(3), :);
-                    positionRand4 = positions(indices(4), :);
+                % Selection
+                trialFitness = fobj(trial);
+                fe = fe + 1;
 
-                    % Mutation
-                    mutant = bestPosition + F * (positionRand1 - positionRand2) + F * (positionRand3 - positionRand4);
-                    mutant = max(min(mutant, ub), lb); % Ensure within bounds
-
-                    % Crossover
-                    trial = positions(i, :);
-                    j_rand = randi(dim); % Random index for crossover
-
-                    for j = 1:dim
-
-                        if rand < CR || j == j_rand
-                            trial(j) = mutant(j);
-                        end
-
-                    end
-
-                    % Selection
-                    trialFitness = fobj(trial);
+                if trialFitness < fitness(i)
+                    positions(i, :) = trial;
+                    fitness(i) = trialFitness;
                     fe = fe + 1;
-
-                    if trialFitness < fitness(i)
-                        positions(i, :) = trial;
-                        fitness(i) = trialFitness;
-                        fe = fe + 1;
-                    end
-
-                case 3
-
-                    % Select three random indices
-                    indices = randperm(searchAgentsNum, 2);
-                    positionRand1 = positions(indices(1), :);
-                    positionRand2 = positions(indices(2), :);
-
-                    % Mutation
-                    mutant = positions(i, :) + F * (positionRand1 - positionRand2);
-                    mutant = max(min(mutant, ub), lb); % Ensure within bounds
-
-                    % Crossover
-                    trial = positions(i, :);
-                    j_rand = randi(dim); % Random index for crossover
-
-                    for j = 1:dim
-
-                        if rand < CR || j == j_rand
-                            trial(j) = mutant(j);
-                        end
-
-                    end
-
-                    % Selection
-                    trialFitness = fobj(trial);
-                    fe = fe + 1;
-
-                    if trialFitness < fitness(i)
-                        positions(i, :) = trial;
-                        fitness(i) = trialFitness;
-                        fe = fe + 1;
-                    end
-
-                case 4
-
-                    % Select three random indices
-                    indices = randperm(searchAgentsNum, 4);
-                    positionRand1 = positions(indices(1), :);
-                    positionRand2 = positions(indices(2), :);
-                    positionRand3 = positions(indices(3), :);
-                    positionRand4 = positions(indices(4), :);
-
-                    % Mutation
-                    mutant = positions(i, :) + F * (positionRand1 - positionRand2) + F * (positionRand3 - positionRand4);
-                    mutant = max(min(mutant, ub), lb); % Ensure within bounds
-
-                    % Crossover
-                    trial = positions(i, :);
-                    j_rand = randi(dim); % Random index for crossover
-
-                    for j = 1:dim
-
-                        if rand < CR || j == j_rand
-                            trial(j) = mutant(j);
-                        end
-
-                    end
-
-                    % Selection
-                    trialFitness = fobj(trial);
-                    fe = fe + 1;
-
-                    if trialFitness < fitness(i)
-                        positions(i, :) = trial;
-                        fitness(i) = trialFitness;
-                        fe = fe + 1;
-                    end
-
-                case 5
-
-                    % Select three random indices
-                    indices = randperm(searchAgentsNum, 2);
-                    positionRand1 = positions(indices(1), :);
-                    positionRand2 = positions(indices(2), :);
-
-                    % Mutation
-                    mutant = positions(i, :) + F * (bestPosition - positions(i, :)) + F * (positionRand1 - positionRand2);
-                    mutant = max(min(mutant, ub), lb); % Ensure within bounds
-
-                    % Crossover
-                    trial = positions(i, :);
-                    j_rand = randi(dim); % Random index for crossover
-
-                    for j = 1:dim
-
-                        if rand < CR || j == j_rand
-                            trial(j) = mutant(j);
-                        end
-
-                    end
-
-                    % Selection
-                    trialFitness = fobj(trial);
-                    fe = fe + 1;
-
-                    if trialFitness < fitness(i)
-                        positions(i, :) = trial;
-                        fitness(i) = trialFitness;
-                        fe = fe + 1;
-                    end
-
-                case 6
-
-                    % Select three random indices
-                    indices = randperm(searchAgentsNum, 4);
-                    positionRand1 = positions(indices(1), :);
-                    positionRand2 = positions(indices(2), :);
-                    positionRand3 = positions(indices(3), :);
-                    positionRand4 = positions(indices(4), :);
-
-                    % Mutation
-                    mutant = positions(i, :) + F * (bestPosition - positions(i, :)) + F * (positionRand1 - positionRand2) + F * (positionRand3 - positionRand4);
-                    mutant = max(min(mutant, ub), lb); % Ensure within bounds
-
-                    % Crossover
-                    trial = positions(i, :);
-                    j_rand = randi(dim); % Random index for crossover
-
-                    for j = 1:dim
-
-                        if rand < CR || j == j_rand
-                            trial(j) = mutant(j);
-                        end
-
-                    end
-
-                    % Selection
-                    trialFitness = fobj(trial);
-                    fe = fe + 1;
-
-                    if trialFitness < fitness(i)
-                        positions(i, :) = trial;
-                        fitness(i) = trialFitness;
-                        fe = fe + 1;
-                    end
-
-                case 7
-
-                    % Select three random indices
-                    indices = randperm(searchAgentsNum, 3);
-                    positionRand1 = positions(indices(1), :);
-                    positionRand2 = positions(indices(2), :);
-                    positionRand3 = positions(indices(3), :);
-
-                    % Mutation
-                    mutant = positionRand1 + F * (positionRand2 - positionRand3);
-                    mutant = max(min(mutant, ub), lb); % Ensure within bounds
-
-                    % Crossover
-                    trial = positions(i, :);
-                    j_rand = randi(dim); % Random index for crossover
-
-                    for j = 1:dim
-
-                        if rand < CR || j == j_rand
-                            trial(j) = mutant(j);
-                        end
-
-                    end
-
-                    % Selection
-                    trialFitness = fobj(trial);
-                    fe = fe + 1;
-
-                    if trialFitness < fitness(i)
-                        positions(i, :) = trial;
-                        fitness(i) = trialFitness;
-                        fe = fe + 1;
-                    end
-
-                case 8
-
-                    % Select three random indices
-                    indices = randperm(searchAgentsNum, 5);
-                    positionRand1 = positions(indices(1), :);
-                    positionRand2 = positions(indices(2), :);
-                    positionRand3 = positions(indices(3), :);
-                    positionRand4 = positions(indices(4), :);
-                    positionRand5 = positions(indices(5), :);
-
-                    % Mutation
-                    mutant = positionRand1 + F * (positionRand2 - positionRand3) + F * (positionRand4 - positionRand5);
-                    mutant = max(min(mutant, ub), lb); % Ensure within bounds
-
-                    % Crossover
-                    trial = positions(i, :);
-                    j_rand = randi(dim); % Random index for crossover
-
-                    for j = 1:dim
-
-                        if rand < CR || j == j_rand
-                            trial(j) = mutant(j);
-                        end
-
-                    end
-
-                    % Selection
-                    trialFitness = fobj(trial);
-                    fe = fe + 1;
-
-                    if trialFitness < fitness(i)
-                        positions(i, :) = trial;
-                        fitness(i) = trialFitness;
-                        fe = fe + 1;
-                    end
+                end
 
             end
 

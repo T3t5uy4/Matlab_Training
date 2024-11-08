@@ -12,7 +12,7 @@
 
 %% this codes are slightly modified to cater for CEC 2005 benchmarks
 %%%%%%%%%%%%%%%%%%%
-function [fes, GBEST, cg_curve] = GL_25(N, MaxFEs, lb, ub, dim, fobj)
+function [fes, GBEST, cg_curve] = SHADE(N, MaxFEs, lb, ub, dim, fobj)
 
     format long;
     format compact;
@@ -84,8 +84,8 @@ function [fes, GBEST, cg_curve] = GL_25(N, MaxFEs, lb, ub, dim, fobj)
     %% main loop
     while fes <= MaxFEs
 
-        'SHADE'
-        t
+        % 'SHADE'
+        % t
 
         pop = popold; % the old population becomes the current population
         [~, sorted_index] = sort(fitness, 'ascend');

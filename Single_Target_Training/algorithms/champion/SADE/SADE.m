@@ -311,7 +311,7 @@ function [D, GBEST, convergence] = SADE(SearchAgents_no, MaxFEs, lb, ub, dim, fo
         ns = [ns; sum(lpcount, 1)];
         nf = [nf; sum(npcount, 1)];
 
-        if iter >= learngen,
+        if iter >= learngen
 
             for i = 1:numst
 

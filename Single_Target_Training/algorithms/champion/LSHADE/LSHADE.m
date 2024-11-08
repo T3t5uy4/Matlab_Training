@@ -212,7 +212,7 @@ function [lu, bsf_solution, cg_curve] = LSHADE(N, Max_FEs, lb, ub, dim, fobj)
             for r = 1:reduction_ind_num
                 [~, indBest] = sort(fitness, 'ascend');
                 worst_ind = indBest(end);
-                worst_ind
+                % worst_ind
                 popold(worst_ind, :) = [];
                 pop(worst_ind, :) = [];
                 fitness(worst_ind, :) = [];

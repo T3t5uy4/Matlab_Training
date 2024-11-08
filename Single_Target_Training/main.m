@@ -19,8 +19,8 @@ fold = 3;
 %% Algorithm Select
 % Select the algorithm to be trained
 % Please do not select more than 13 algorithms
-algorithmName = {'RLHHO', 'HHO'};
-remarkStr = 'RLHHO';
+algorithmName = {'DEAHHO_version5', 'DEAHHO_version4', 'DEAHHO_version3'};
+remarkStr = 'versionPK';
 
 %% Select training data set
 % 1-23 is the CEC05 function set

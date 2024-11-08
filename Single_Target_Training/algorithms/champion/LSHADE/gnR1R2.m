@@ -24,7 +24,7 @@ function [r1, r2] = gnR1R2(NP1, NP2, r0)
             r1(pos) = floor(rand(1, sum(pos)) * NP1) + 1;
         end
 
-        if i > 1000, % this has never happened so far
+        if i > 1000 % this has never happened so far
             error('Can not genrate r1 in 1000 iterations');
         end
 
@@ -41,7 +41,7 @@ function [r1, r2] = gnR1R2(NP1, NP2, r0)
             r2(pos) = floor(rand(1, sum(pos)) * NP2) + 1;
         end
 
-        if i > 1000, % this has never happened so far
+        if i > 1000 % this has never happened so far
             error('Can not genrate r2 in 1000 iterations');
         end
 
