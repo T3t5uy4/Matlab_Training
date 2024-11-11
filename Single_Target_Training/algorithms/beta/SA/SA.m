@@ -1,53 +1,57 @@
-%% Simulated Annealing£¬SA
-function [Best_score,Best_pos,curve]=SA(Mmax,l,u,dim,fobj)
-% ÊäÈë: 
-%        fobj = ÊÊÓ¦¶Èº¯Êı
-%        x0 = ÊäÈëÖÖÈº
-%        l = ÖÖÈºÏÂ±ß½ç
-%        u = ÖÖÈºÉÏ±ß½ç
-%        Mmax = ×î´óÎÂ¶È
-%        TolFun = ÓÅ»¯±ä»¯ÈİÈÌ¶È
-%
-%
-% Êä³ö: 
-%        x0 = Êä³öÓÅ»¯ºóµÄÖÖÈº
-%        f0 = Êä³öÓÅ»¯ºóµÄÖÖÈºµÄÊÊÓ¦¶ÈÖµ
-TolFun = 10E-10;%Ä£ÄâÍË»ğÈİÈÌ¶È
-x0 = (u-l).*rand(1,dim)+l;%Ëæ»ú³õÊ¼»¯Ä£ÄâÍË»ğ;
-f = fobj;%ÊÊÓ¦¶Èº¯Êı
-x=x0;
-fx=feval(f,x);%¼ÆËãÊÊÓ¦¶ÈÖµ
-f0=fx;
-count = 1;%ÓÃÓÚ¼ÇÂ¼ÊÕÁ²ÇúÏß±ê¼Ç
-%Ä£ÄâÍË»ğÖ÷Òª²½Öè
-for m=1:Mmax
-    T=m/Mmax; %ÎÂ¶È
-    mu=10^(T*1000);  
-    %For each temperature we take 100 test points to simulate reach termal
-    for k=0:100
-        dx=mu_inv(2*rand(1,dim)-1,mu).*(u-l);
-        x1=x+dx;
-        %±ß½ç´¦Àí·ÀÖ¹Ô½½ç
-        x1=(x1 < l).*l+(l <= x1).*(x1 <= u).*x1+(u < x1).*u;
-        %¼ÆËãµ±Ç°Î»ÖÃÊÊÓ¦¶ÈÖµºÍÊÊÓ¦¶ÈÖµÆ«²î
-        fx1=feval(f,x1);df=fx1-fx;
-        % Èç¹ûdf<0Ôò½ÓÊÜ¸Ã½â£¬Èç¹û´óÓÚ0 ÔòÀûÓÃMetropolis×¼Ôò½øĞĞÅĞ¶ÏÊÇ·ñ½ÓÊÜ       
-        if (df < 0 || rand < exp(-T*df/(abs(fx)+eps)/TolFun))==1
-            x=x1;fx=fx1;
-        end        
-        %ÅĞ¶Ïµ±Ç°½âÊÇ·ñ¸üÓÅ£¬¸üÓÅÔò¸üĞÂ.       
-        if fx1 < f0 ==1
-            x0=x1;f0=fx1;
-        end 
+%% Simulated Annealingï¿½ï¿½SA
+function [Best_score, Best_pos, curve] = SA(Mmax, l, u, dim, fobj)
+    % ï¿½ï¿½ï¿½ï¿½:
+    %        fobj = ï¿½ï¿½Ó¦ï¿½Èºï¿½ï¿½ï¿½
+    %        x0 = ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Èº
+    %        l = ï¿½ï¿½Èºï¿½Â±ß½ï¿½
+    %        u = ï¿½ï¿½Èºï¿½Ï±ß½ï¿½
+    %        Mmax = ï¿½ï¿½ï¿½ï¿½Â¶ï¿½
+    %        TolFun = ï¿½Å»ï¿½ï¿½ä»¯ï¿½ï¿½ï¿½Ì¶ï¿½
+    %
+    %
+    % ï¿½ï¿½ï¿½:
+    %        x0 = ï¿½ï¿½ï¿½ï¿½Å»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Èº
+    %        f0 = ï¿½ï¿½ï¿½ï¿½Å»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Èºï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½Öµ
+    TolFun = 10E-10; %Ä£ï¿½ï¿½ï¿½Ë»ï¿½ï¿½ï¿½ï¿½Ì¶ï¿½
+    x0 = (u - l) .* rand(1, dim) + l; %ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½Ä£ï¿½ï¿½ï¿½Ë»ï¿½;
+    f = fobj; %ï¿½ï¿½Ó¦ï¿½Èºï¿½ï¿½ï¿½
+    x = x0;
+    fx = feval(f, x); %ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½Öµ
+    f0 = fx;
+    count = 1; %ï¿½ï¿½ï¿½Ú¼ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß±ï¿½ï¿½
+    %Ä£ï¿½ï¿½ï¿½Ë»ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½
+    for m = 1:Mmax
+        T = m / Mmax; %ï¿½Â¶ï¿½
+        mu = 10 ^ (T * 1000);
+        %For each temperature we take 100 test points to simulate reach termal
+        for k = 0:100
+            dx = mu_inv(2 * rand(1, dim) - 1, mu) .* (u - l);
+            x1 = x + dx;
+            %ï¿½ß½ç´¦ï¿½ï¿½ï¿½ï¿½Ö¹Ô½ï¿½ï¿½
+            x1 = (x1 < l) .* l + (l <= x1) .* (x1 <= u) .* x1 + (u < x1) .* u;
+            %ï¿½ï¿½ï¿½ãµ±Ç°Î»ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½ÖµÆ«ï¿½ï¿½
+            fx1 = feval(f, x1); df = fx1 - fx;
+            % ï¿½ï¿½ï¿½df<0ï¿½ï¿½ï¿½ï¿½Ü¸Ã½â£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Metropolis×¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ¶ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½
+            if (df < 0 || rand < exp(-T * df / (abs(fx) + eps) / TolFun)) == 1
+                x = x1; fx = fx1;
+            end
+
+            %ï¿½Ğ¶Ïµï¿½Ç°ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½Å£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
+            if fx1 < f0 == 1
+                x0 = x1; f0 = fx1;
+            end
+
+        end
+
+        curve(count) = f0;
+        count = count + 1;
     end
-     curve(count) = f0;
-     count = count+1;
-end
-Best_pos = x0;
-Best_score = f0;
+
+    Best_pos = x0;
+    Best_score = f0;
 end
 
-function x=mu_inv(y,mu)
-%Ä£ÄâÍË»ğ²úÉúĞÂÎ»ÖÃÆ«²î
-x=(((1+mu).^abs(y)-1)/mu).*sign(y);
+function x = mu_inv(y, mu)
+    %Ä£ï¿½ï¿½ï¿½Ë»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½Æ«ï¿½ï¿½
+    x = (((1 + mu) .^ abs(y) - 1) / mu) .* sign(y);
 end

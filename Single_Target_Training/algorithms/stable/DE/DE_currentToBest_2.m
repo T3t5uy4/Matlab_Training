@@ -62,7 +62,6 @@ function [bestFitness, bestPosition, convergenceCurve] = DE_currentToBest_2(sear
             if trialFitness < fitness(i)
                 positions(i, :) = trial;
                 fitness(i) = trialFitness;
-                fe = fe + 1;
             end
 
         end

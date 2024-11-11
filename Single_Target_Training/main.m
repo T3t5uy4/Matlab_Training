@@ -19,7 +19,7 @@ fold = 3;
 %% Algorithm Select
 % Select the algorithm to be trained
 % Please do not select more than 13 algorithms
-algorithmName = {'DEAHHO_version5', 'DEAHHO_version4', 'DEAHHO_version3'};
+algorithmName = {'DEAHHO_version5', 'SCA'};
 remarkStr = 'versionPK';
 
 %% Select training data set

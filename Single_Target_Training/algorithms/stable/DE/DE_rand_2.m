@@ -63,7 +63,6 @@ function [bestFitness, bestPosition, convergenceCurve] = DE_rand_2(searchAgentsN
             if trialFitness < fitness(i)
                 positions(i, :) = trial;
                 fitness(i) = trialFitness;
-                fe = fe + 1;
             end
 
         end

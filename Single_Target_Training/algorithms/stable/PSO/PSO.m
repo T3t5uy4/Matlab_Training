@@ -6,39 +6,45 @@ function [bestFitness, bestPosition, convergenceCurve] = PSO(searchAgentsNum, ma
 
     % Initialize the positions of search agents
     positions = initialization(searchAgentsNum, dim, ub, lb);
-    convergenceCurve = [];
-    velocities = zeros(searchAgentsNum, dim);
-    preBestPosition = positions;
-    fitness = zeros(searchAgentsNum, 1);
+    velocities = zeros(searchAgentsNum, dim); % Velocity of each agent
+    preBestPosition = positions; % Best position of each agent so far
+    fitness = []; % Fitness values for each agent
+    convergenceCurve = []; % To record the convergence curve (fitness over iterations)
 
     w = 0.5; % Inertia weight
     c1 = 1.5; % Cognitive coefficient
     c2 = 1.5; % Social coefficient
-    t = 0;
-    fe = searchAgentsNum;
+    t = 0; % Iteration counter
+    fe = 0; % Function evaluations counter
 
+    % Main PSO loop
     while fe < maxFes
 
-        for i = 1:size(positions, 1)
-            % Check boundries
+        for i = 1:searchAgentsNum
+            % Check boundaries and correct positions if out of bounds
             FU = positions(i, :) > ub;
             FL = positions(i, :) < lb;
             positions(i, :) = (positions(i, :) .* (~(FU + FL))) + ub .* FU + lb .* FL;
-            % Fitness of locations
-            newFitness = fobj(positions(i, :));
+
+            % Evaluate the fitness of the current position
+            fitness(i) = fobj(positions(i, :));
             fe = fe + 1;
 
-            if newFitness < bestFitness
-                bestFitness = newFitness;
+            % Update the best global position and fitness
+            if fitness(i) < bestFitness
+                bestFitness = fitness(i);
                 bestPosition = positions(i, :);
             end
 
         end
 
-        for i = 1:size(positions, 1)
-            % Update velocities
+        % Update particle velocities and positions
+        for i = 1:searchAgentsNum
+            % Random coefficients
             r1 = rand(dim);
             r2 = rand(dim);
+
+            % Update velocities
             velocities(i, :) = w * velocities(i, :) + c1 * r1 .* (preBestPosition(i, :) - positions(i, :)) + c2 * r2 .* (bestPosition - positions(i, :));
 
             % Update positions
@@ -47,18 +53,16 @@ function [bestFitness, bestPosition, convergenceCurve] = PSO(searchAgentsNum, ma
             % Apply bounds
             positions(i, :) = max(min(positions(i, :), ub), lb);
 
-            % Fitness of locations
-            fitness = fobj(positions(i, :));
+            % Re-evaluate fitness of new positions
+            fitness(i) = fobj(positions(i, :));
             fe = fe + 1;
 
-            if fitness < fobj(preBestPosition(i, :))
-
+            % Update individual best position
+            if fitness(i) < fobj(preBestPosition(i, :))
+                preBestPosition(i, :) = positions(i, :);
             end
 
-            if fitness < bestFitness
-                bestFitness = fitness;
-                bestPosition = positions(i, :);
-            end
+            fe = fe + 1;
 
         end
 

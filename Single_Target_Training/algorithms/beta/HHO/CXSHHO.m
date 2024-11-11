@@ -1,8 +1,10 @@
 % The Harris hawks optimization Algorithm
-function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version5(searchAgentsNum, maxFes, lb, ub, dim, fobj)
+function [bestFitness, bestPosition, convergenceCurve] = CXSHHO(searchAgentsNum, maxFes, lb, ub, dim, fobj)
     % Initialize position vector and fitness for the best
     bestFitness = inf;
     bestPosition = zeros(1, dim);
+    secondFitness = inf;
+    secondPosition = zeros(1, dim);
 
     % Initialize the positions of search agents
     positions = initialization(searchAgentsNum, dim, ub, lb);
@@ -11,8 +13,7 @@ function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version5(searchA
 
     t = 0;
     fe = 0;
-    F = 0.5; % Scaling factor
-    CR = 0.9; % Crossover probability
+    alpha = 0.95;
 
     while fe < maxFes
 
@@ -26,10 +27,22 @@ function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version5(searchA
             fe = fe + 1;
 
             if fitness(i) < bestFitness
+                secondFitness = bestFitness;
                 bestFitness = fitness(i);
+                secondPosition = bestPosition;
                 bestPosition = positions(i, :);
+            elseif fitness(i) < secondFitness
+                secondFitness = fitness(i);
+                secondPosition = positions(i, :);
             end
 
+        end
+
+        for i = 1:size(positions, 1)
+            % Communication and collaboration strategy
+            r6 = rand;
+            beta = r6 / alpha;
+            X(i, :) = X(i, :) + (1 - r6) * (bestPosition - secondPosition) / 2;
         end
 
         % Update the Harris hawk's position
@@ -105,73 +118,32 @@ function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version5(searchA
 
             end
 
-            r = rand;
-            p1 = (1 - fe / maxFes) / 2;
-            p2 = (1 - p1) * (fe / maxFes) / 2;
+            % Directional crossover strategy
+            [k1, k2] = getRand(i, searchAgentsNum);
+            parent1 = positions(k1, :);
+            parent2 = positions(k2, :);
 
-            if r < p1
-                % DE_rand
-                % Select three random indices
-                indices = randperm(searchAgentsNum, 3);
-                positionRand1 = positions(indices(1), :);
-                positionRand2 = positions(indices(2), :);
-                positionRand3 = positions(indices(3), :);
+            for j = 1:size(positions, 2)
 
-                % Mutation
-                mutant = positionRand1 + F * (positionRand2 - positionRand3);
-                mutant = max(min(mutant, ub), lb); % Ensure within bounds
+                if parent1(j) ~= parent2(j)
 
-                % Crossover
-                trial = positions(i, :);
-                j_rand = randi(dim); % Random index for crossover
-
-                for j = 1:dim
-
-                    if rand < CR || j == j_rand
-                        trial(j) = mutant(j);
+                    if fobj(parent1(j)) <= fobj(parent2(j))
+                        bestParent = parent1(j);
+                    else
+                        bestParent = parent2(j)
                     end
 
-                end
+                    meanParent = (parent1(j) + parent2(j)) / 2;
 
-                % Selection
-                trialFitness = fobj(trial);
-                fe = fe + 1;
+                    if bestParent >= meanParent
+                        val = 1 - 0.5 ^ (exp(abs(parent1(j) - parent2(j)) / (bestPosition(j) - secondPosition(j))));
+                        c1 = val * (parent1(j) - parent2(j)) + alpha ^ (1 - r6) * exp(1 - beta) * (1 - val) * abs(parent1(j) - parent2(j));
+                        c2 = (1 - val) * (parent1(j) - parent2(j));
 
-                if trialFitness < fitness(i)
-                    positions(i, :) = trial;
-                    fitness(i) = trialFitness;
-                end
-
-            elseif r < p1 + p2
-                % DE_currentToBest
-                % Select three random indices
-                indices = randperm(searchAgentsNum, 2);
-                positionRand1 = positions(indices(1), :);
-                positionRand2 = positions(indices(2), :);
-
-                % Mutation
-                mutant = positions(i, :) + F * (bestPosition - positions(i, :)) + F * (positionRand1 - positionRand2);
-                mutant = max(min(mutant, ub), lb); % Ensure within bounds
-
-                % Crossover
-                trial = positions(i, :);
-                j_rand = randi(dim); % Random index for crossover
-
-                for j = 1:dim
-
-                    if rand < CR || j == j_rand
-                        trial(j) = mutant(j);
+                    else
                     end
 
-                end
-
-                % Selection
-                trialFitness = fobj(trial);
-                fe = fe + 1;
-
-                if trialFitness < fitness(i)
-                    positions(i, :) = trial;
-                    fitness(i) = trialFitness;
+                else
                 end
 
             end
@@ -181,6 +153,21 @@ function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version5(searchA
         t = t + 1;
         convergenceCurve(t) = bestFitness;
 
+    end
+
+end
+
+function [k1, k2] = get2Rand(i, n)
+    k1 = randi([1, n]);
+
+    while k1 == i
+        k1 = randi([1, n]);
+    end
+
+    k2 = randi([1, n]);
+
+    while k2 == i || k2 == k1
+        k2 = randi([1, n]);
     end
 
 end

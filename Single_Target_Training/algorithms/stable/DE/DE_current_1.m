@@ -60,7 +60,6 @@ function [bestFitness, bestPosition, convergenceCurve] = DE_current_1(searchAgen
             if trialFitness < fitness(i)
                 positions(i, :) = trial;
                 fitness(i) = trialFitness;
-                fe = fe + 1;
             end
 
         end
