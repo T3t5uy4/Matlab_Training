@@ -1,16 +1,18 @@
 % The Harris hawks optimization Algorithm
-function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version3(searchAgentsNum, maxFes, lb, ub, dim, fobj)
+function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version6(searchAgentsNum, maxFes, lb, ub, dim, fobj)
     % Initialize position vector and fitness for the best
     bestFitness = inf;
     bestPosition = zeros(1, dim);
 
     % Initialize the positions of search agents
     positions = initialization(searchAgentsNum, dim, ub, lb);
+    fitness = [];
     convergenceCurve = [];
 
-    fe = 0;
     t = 0;
-    keepRate = 0.0;
+    fe = 0;
+    F = 0.5; % Scaling factor
+    CR = 0.9; % Crossover probability
 
     while fe < maxFes
 
@@ -20,11 +22,11 @@ function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version3(searchA
             FL = positions(i, :) < lb;
             positions(i, :) = (positions(i, :) .* (~(FU + FL))) + ub .* FU + lb .* FL;
             % Fitness of locations
-            fitness = fobj(positions(i, :));
+            fitness(i) = fobj(positions(i, :));
             fe = fe + 1;
 
-            if fitness < bestFitness
-                bestFitness = fitness;
+            if fitness(i) < bestFitness
+                bestFitness = fitness(i);
                 bestPosition = positions(i, :);
             end
 
@@ -60,150 +62,115 @@ function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version3(searchA
                 elseif r < 0.5 && abs(E) >= 0.5 % Soft besiege with motions
                     jumpStrength = 2 * (1 - rand); % Random jump strength
                     position1 = bestPosition - E * abs(jumpStrength * bestPosition - positions(i, :));
+                    fitness1 = fobj(position1);
+                    fe = fe + 1;
 
-                    if fobj(position1) < fobj(positions(i, :))
+                    if fitness1 < fitness(i)
+                        fitness(i) = fitness1;
                         positions(i, :) = position1;
                     else
                         position2 = bestPosition - E * abs(jumpStrength * bestPosition - positions(i, :)) + rand(1, dim) .* Levy(dim);
+                        fitness2 = fobj(position2);
+                        fe = fe + 1;
 
-                        if fobj(position2) < fobj(positions(i, :))
+                        if fitness2 < fitness(i)
+                            fitness(i) = fitness2;
                             positions(i, :) = position2;
                         end
 
                     end
-
-                    fe = fe + 1;
 
                 elseif r < 0.5 && abs(E) < 0.5 % Hard besiege with motions
                     jumpStrength = 2 * (1 - rand); % Random jump strength
                     position1 = bestPosition - E * abs(jumpStrength * bestPosition - mean(positions));
+                    fitness1 = fobj(position1);
+                    fe = fe + 1;
 
-                    if fobj(position1) < fobj(positions(i, :))
+                    if fitness1 < fitness(i)
+                        fitness(i) = fitness1;
                         positions(i, :) = position1;
                     else
                         position2 = bestPosition - E * abs(jumpStrength * bestPosition - mean(positions)) + rand(1, dim) .* Levy(dim);
+                        fitness2 = fobj(position2);
+                        fe = fe + 1;
 
-                        if fobj(position2) < fobj(positions(i, :))
+                        if fitness2 < fitness(i)
+                            fitness(i) = fitness2;
                             positions(i, :) = position2;
                         end
 
                     end
 
-                    fe = fe + 1;
-
                 end
 
             end
 
-        end
+            r = rand;
+            feNorm = fe / maxFes;
+            p1 = 2 * ((1 - feNorm) ^ 3) / 3;
+            p2 = (2 * (feNorm ^ 2) * (1 - feNorm) + 1) / 3;
 
-        % Sort positions as fobj
-        fobjPositions = [];
+            if r <= p1
+                % DE_rand
+                % Select three random indices
+                indices = randperm(searchAgentsNum, 3);
+                positionRand1 = positions(indices(1), :);
+                positionRand2 = positions(indices(2), :);
+                positionRand3 = positions(indices(3), :);
 
-        for i = 1:size(positions, 1)
-            fobjPositions(i) = fobj(positions(i, :));
-        end
+                % Mutation
+                mutant = positionRand1 + (positionRand2 - positionRand3) .* Levy(dim);
+                mutant = max(min(mutant, ub), lb); % Ensure within bounds
+            elseif r <= p1 + p2
+                % DE_currentToBest
+                % Select two random indices
+                indices = randperm(searchAgentsNum, 2);
+                positionRand1 = positions(indices(1), :);
+                positionRand2 = positions(indices(2), :);
 
-        [~, sortedIndices] = sort(fobjPositions);
-        sortedPositions = positions(sortedIndices, :);
+                % Mutation
+                mutant = positions(i, :) + (positionRand1 - positionRand2) .* Levy(dim);
+                mutant = max(min(mutant, ub), lb); % Ensure within bounds
+                mutant = max(min(mutant, ub), lb); % Ensure within bounds
+            else
+                % DE_currentToBest
+                % Select two random indices
+                indices = randperm(searchAgentsNum, 2);
+                positionRand1 = positions(indices(1), :);
+                positionRand2 = positions(indices(2), :);
 
-        % Divede the positions
-        partSize1 = floor(searchAgentsNum / 3 * (1 - fe / (maxFes * 3)));
-        partSize2 = floor(1 * searchAgentsNum / 3 * (1 + keepRate));
+                % Mutation
+                mutant = positions(i, :) + F * (bestPosition - positions(i, :)) + (positionRand1 - positionRand2) .* Levy(dim);
+                mutant = max(min(mutant, ub), lb); % Ensure within bounds
 
-        bestPart = sortedPositions(1:partSize1, :);
-        worstPart = sortedPositions(searchAgentsNum - partSize2 + 1:end, :);
+            end
 
-        % Update the best part
-        [bestPart, fe] = DEA(bestPart, dim, fobj, fe);
+            % Crossover
+            trial = positions(i, :);
+            j_rand = randi(dim); % Random index for crossover
 
-        % Update the worst part
-        for i = 1:size(worstPart, 1)
-            worstPart(i, :) = worstPart(i, :) + (1 / (t + 1)) * (bestPosition - worstPart(i, :));
-        end
+            for j = 1:dim
 
-        % Merge positions
-        mergedPositions = [bestPart; positions; worstPart];
-        fobjPositions = [];
-
-        for i = 1:size(mergedPositions, 1)
-            fobjPositions(i) = fobj(mergedPositions(i, :));
-        end
-
-        [~, sortedIndices] = sort(fobjPositions);
-        sortedPositions = mergedPositions(sortedIndices, :);
-        positions = sortedPositions(1:searchAgentsNum, :);
-        count = 0;
-
-        for i = 1:size(positions(1, :))
-
-            for j = 1:size(worstPart, 1)
-
-                if isequal(positions(i, :), worstPart(j, :))
-                    count = count + 1;
-                    break;
+                if rand < CR || j == j_rand
+                    trial(j) = mutant(j);
                 end
 
             end
 
+            % Selection
+            trialFitness = fobj(trial);
+            fe = fe + 1;
+
+            if trialFitness < fitness(i)
+                positions(i, :) = trial;
+                fitness(i) = trialFitness;
+            end
+
         end
 
-        keepRate = count / partSize2;
-        fitness = fobj(positions(1, :));
-
-        if fitness < bestFitness
-            bestFitness = fitness;
-            bestPosition = positions(1, :);
-        end
-
-        fe = fe + 1;
         t = t + 1;
         convergenceCurve(t) = bestFitness;
 
     end
 
-end
-
-% The Differential Evolution Algorithm
-function [positions, fe] = DEA(positions, dim, fobj, fe)
-    F = 0.5;
-    CR = 0.9;
-    newPositions = positions;
-
-    for i = 1:size(newPositions, 1)
-        idxs = randperm(size(newPositions, 1), 3);
-        r1 = idxs(1);
-        r2 = idxs(2);
-        r3 = idxs(3);
-
-        mutant = newPositions(r1, :) + F * (newPositions(r2, :) - newPositions(r3, :));
-
-        trial = newPositions(i, :);
-
-        for j = 1:dim
-
-            if rand < CR
-                trial(j) = mutant(j);
-            end
-
-        end
-
-        if fobj(trial) < fobj(newPositions(i, :))
-            newPositions(i, :) = trial;
-            fe = fe + 1;
-        end
-
-    end
-
-    tempo = [];
-
-    for i = 1:size(positions, 1)
-
-        if ~isequal(newPositions(i, :), positions(i, :))
-            tempo(end + 1, :) = newPositions(i, :);
-        end
-
-    end
-
-    positions = tempo;
 end

@@ -1,74 +1,90 @@
-% Particle Swarm Optimization - PSO
-function [bestFitness, bestPosition, convergenceCurve] = PSO(searchAgentsNum, maxFes, lb, ub, dim, fobj)
-    % Initialize position vector and fitness for the best
-    bestFitness = inf;
-    bestPosition = zeros(1, dim);
+% Particle Swarm Optimization
+function [gBestScore, bestPos, cg_curve] = PSO(N, MaxFEs, lb, ub, dim, fobj)
 
-    % Initialize the positions of search agents
-    positions = initialization(searchAgentsNum, dim, ub, lb);
-    velocities = zeros(searchAgentsNum, dim); % Velocity of each agent
-    preBestPosition = positions; % Best position of each agent so far
-    fitness = []; % Fitness values for each agent
-    convergenceCurve = []; % To record the convergence curve (fitness over iterations)
+    %PSO Infotmation
 
-    w = 0.5; % Inertia weight
-    c1 = 1.5; % Cognitive coefficient
-    c2 = 1.5; % Social coefficient
-    t = 0; % Iteration counter
-    fe = 0; % Function evaluations counter
+    Vmax = 6;
+    noP = N;
+    wMax = 0.9;
+    wMin = 0.2;
+    c1 = 2;
+    c2 = 2;
 
-    % Main PSO loop
-    while fe < maxFes
+    % Initializations
+    vel = zeros(noP, dim);
+    pBestScore = zeros(noP);
+    pBest = zeros(noP, dim);
+    gBest = zeros(1, dim);
+    cg_curve = [];
 
-        for i = 1:searchAgentsNum
-            % Check boundaries and correct positions if out of bounds
-            FU = positions(i, :) > ub;
-            FL = positions(i, :) < lb;
-            positions(i, :) = (positions(i, :) .* (~(FU + FL))) + ub .* FU + lb .* FL;
+    % Random initialization for agents.
+    pos = initialization(noP, dim, ub, lb);
 
-            % Evaluate the fitness of the current position
-            fitness(i) = fobj(positions(i, :));
-            fe = fe + 1;
+    for i = 1:noP
+        pBestScore(i) = inf;
+    end
 
-            % Update the best global position and fitness
-            if fitness(i) < bestFitness
-                bestFitness = fitness(i);
-                bestPosition = positions(i, :);
+    % Initialize gBestScore for a minimization problem
+    gBestScore = inf;
+
+    it = 1;
+    FEs = 0;
+    % Main loop
+    while FEs < MaxFEs
+
+        % Return back the particles that go beyond the boundaries of the search
+        % space
+        Flag4ub = pos(i, :) > ub;
+        Flag4lb = pos(i, :) < lb;
+        pos(i, :) = (pos(i, :) .* (~(Flag4ub + Flag4lb))) + ub .* Flag4ub + lb .* Flag4lb;
+
+        for i = 1:size(pos, 1)
+            %Calculate objective function for each particle
+            if FEs < MaxFEs
+                FEs = FEs + 1;
+                fitness = fobj(pos(i, :));
+
+                if (pBestScore(i) > fitness)
+                    pBestScore(i) = fitness;
+                    pBest(i, :) = pos(i, :);
+                end
+
+                if (gBestScore > fitness)
+                    gBestScore = fitness;
+                    gBest = pos(i, :);
+                end
+
+            else
+                break;
             end
 
         end
 
-        % Update particle velocities and positions
-        for i = 1:searchAgentsNum
-            % Random coefficients
-            r1 = rand(dim);
-            r2 = rand(dim);
+        %Update the W of PSO
+        %     w=wMax-l*((wMax-wMin)/iter);
+        w = 1;
+        %Update the Velocity and Position of particles
+        for i = 1:size(pos, 1)
 
-            % Update velocities
-            velocities(i, :) = w * velocities(i, :) + c1 * r1 .* (preBestPosition(i, :) - positions(i, :)) + c2 * r2 .* (bestPosition - positions(i, :));
+            for j = 1:size(pos, 2)
+                vel(i, j) = w * vel(i, j) + c1 * rand() * (pBest(i, j) - pos(i, j)) + c2 * rand() * (gBest(j) - pos(i, j));
 
-            % Update positions
-            positions(i, :) = positions(i, :) + velocities(i, :);
+                if (vel(i, j) > Vmax)
+                    vel(i, j) = Vmax;
+                end
 
-            % Apply bounds
-            positions(i, :) = max(min(positions(i, :), ub), lb);
+                if (vel(i, j) <- Vmax)
+                    vel(i, j) = -Vmax;
+                end
 
-            % Re-evaluate fitness of new positions
-            fitness(i) = fobj(positions(i, :));
-            fe = fe + 1;
-
-            % Update individual best position
-            if fitness(i) < fobj(preBestPosition(i, :))
-                preBestPosition(i, :) = positions(i, :);
+                pos(i, j) = pos(i, j) + vel(i, j);
             end
-
-            fe = fe + 1;
 
         end
 
-        t = t + 1;
-        convergenceCurve(t) = bestFitness;
-
+        cg_curve(it) = gBestScore;
+        it = it + 1;
+        bestPos = gBest;
     end
 
 end

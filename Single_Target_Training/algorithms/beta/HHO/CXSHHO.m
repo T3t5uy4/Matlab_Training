@@ -123,32 +123,64 @@ function [bestFitness, bestPosition, convergenceCurve] = CXSHHO(searchAgentsNum,
             parent1 = positions(k1, :);
             parent2 = positions(k2, :);
 
+            if fitness(k1) <= fitness(k2)
+                bestParent = parent1;
+            else
+                bestParent = parent2;
+            end
+
+            meanParent = (parent1 + parent2) / 2;
+
             for j = 1:size(positions, 2)
+                r7 = rand;
 
                 if parent1(j) ~= parent2(j)
 
-                    if fobj(parent1(j)) <= fobj(parent2(j))
-                        bestParent = parent1(j);
-                    else
-                        bestParent = parent2(j)
-                    end
-
-                    meanParent = (parent1(j) + parent2(j)) / 2;
-
-                    if bestParent >= meanParent
+                    if bestParent(j) >= meanParent(j)
                         val = 1 - 0.5 ^ (exp(abs(parent1(j) - parent2(j)) / (bestPosition(j) - secondPosition(j))));
-                        c1 = val * (parent1(j) - parent2(j)) + alpha ^ (1 - r6) * exp(1 - beta) * (1 - val) * abs(parent1(j) - parent2(j));
-                        c2 = (1 - val) * (parent1(j) - parent2(j));
+
+                        if r7 <= pd
+                            c1 = val * (parent1(j) - parent2(j)) + (alpha ^ (1 - r6)) * exp(1 - beta) * (1 - val) * abs(parent1(j) - parent2(j));
+                            c2 = (1 - val) * (parent1(j) - parent2(j)) - (alpha ^ (1 - r6)) * exp(1 - beta) * val * abs(parent1(j) - parent2(j));
+                        else
+                            c1 = val * (parent1(j) - parent2(j)) - (alpha ^ (1 - r6)) * exp(1 - beta) * (1 - val) * abs(parent1(j) - parent2(j));
+                            c2 = (1 - val) * (parent1(j) - parent2(j)) + (alpha ^ (1 - r6)) * exp(1 - beta) * val * abs(parent1(j) - parent2(j));
+                        end
 
                     else
+
+                        if r7 <= pd
+                            c1 = val * (parent1(j) + parent2(j)) - (alpha ^ r6) * exp(1 - beta) * (1 - val) * abs(parent1(j) - parent2(j));
+                            c2 = (1 - val) * (parent1(j) + parent2(j)) + (alpha ^ (1 - r6)) * exp(1 - beta) * val * abs(parent1(j) - parent2(j));
+                        else
+                            c1 = val * (parent1(j) + parent2(j)) + (alpha ^ r6) * exp(1 - beta) * (1 - val) * abs(parent1(j) - parent2(j));
+                            c2 = (1 - val) * (parent1(j) + parent2(j)) - (alpha ^ (1 - r6)) * exp(1 - beta) * val * abs(parent1(j) - parent2(j));
+                        end
+
                     end
 
                 else
+
+                    if bestParent(j) ~= meanParent(j)
+                        val = 1 - 0.5 ^ exp(abs(bestParent(j) - meanParent(j)) / (bestParent(j)(j) - secondPosition(j)));
+
+                        if r7 <= pd
+                            c1 = val * (bestParent(j) - meanParent(j)) + (alpha ^ r6) * exp(1 - beta) * (1 - val) * (bestParent(j) - meanParent(j));
+                            c2 = (1 - val) * (bestParent(j) - meanParent(j)) - (alpha ^ (1 - r6)) * exp(1 - beta) * val * (bestParent(j) - meanParent(j));
+                        else
+                            c1 = val * (bestParent(j) - meanParent(j)) - (alpha ^ r6) * exp(1 - beta) * (1 - val) * (bestParent(j) - meanParent(j));
+                            c2 = (1 - val) * (bestParent(j) - meanParent(j)) + (alpha ^ (1 - r6)) * exp(1 - beta) * val * (bestParent(j) - meanParent(j));
+                        end
+
+                    end
+
                 end
 
             end
 
         end
+
+        % Soft-rime strategy
 
         t = t + 1;
         convergenceCurve(t) = bestFitness;

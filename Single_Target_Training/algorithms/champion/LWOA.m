@@ -87,7 +87,8 @@ function [Leader_score, Leader_pos, Convergence_curve] = LWOA(SearchAgents_no, M
             Positions(i, :) = (Positions(i, :) .* (~(Flag4ub + Flag4lb))) + ub .* Flag4ub + lb .* Flag4lb;
 
             fitness = fobj(Positions(i, :));
-            %         FEs=FEs+1;
+            FEs = FEs + 1;
+
             if fitness < Leader_score
                 Leader_score = fitness;
                 Leader_pos = Positions(i, :);

@@ -1,26 +1,18 @@
-function [bestFitness, bestPosition, convergenceCurve] = no_name(searchAgentsNum, maxFes, lb, ub, dim, fobj)
+function [bestFitness, bestPosition, convergenceCurve] = no_name_with_ [alpha, beta, lr](searchAgentsNum, maxFes, lb, ub, dim, fobj)
     % Initialize position vector and fitness for the best
     bestFitness = inf;
     bestPosition = zeros(1, dim);
-    secondFitness = inf;
-    secondPosition = zeros(1, dim);
-
     % Initialize the positions of search agents
     positions = initialization(searchAgentsNum, dim, ub, lb);
-    convergenceCurve = []
+    convergenceCurve = [];
     fitness = zeros(searchAgentsNum, 1);
     t = 0;
-    fe = searchAgentsNum;
-    alpha = 0.6;
-    beta = 0.2;
-    lr = 0.1;
-    preCount = 0;
-    learningTable = [2 1];
+    fe = 0;
 
     while fe < maxFes
 
         for i = 1:size(positions, 1)
-            % Check boundries
+            % Check boundaries
             FU = positions(i, :) > ub;
             FL = positions(i, :) < lb;
             positions(i, :) = (positions(i, :) .* (~(FU + FL))) + ub .* FU + lb .* FL;
@@ -29,91 +21,93 @@ function [bestFitness, bestPosition, convergenceCurve] = no_name(searchAgentsNum
             fe = fe + 1;
 
             if fitness(i) < bestFitness
-                secondFitness = bestFitness;
-                secondPosition = bestPosition;
                 bestFitness = fitness(i);
                 bestPosition = positions(i, :);
-            elseif fitness(i) < secondFitness
-                secondFitness = fitness(i);
-                secondPosition = positions(i, :);
             end
 
         end
 
+        % Dynamic parameter adjustment based on iteration progress
+        meanPosition = mean(positions);
+        [p1, p2, p3] = adjustR(fe / maxFes);
+
+        % Dynamic Programming to optimize parameters and position update
         for i = 1:size(positions, 1)
-            p = fe / maxFes;
             r1 = rand;
-            r2 = rand;
-            count = 0;
 
-            if r1 > p
-                positions(i, :) = alpha * positions(i, :) + learningTable(1) * beta * (rand(1, dim) .* (ub - lb) + lb .* ones(1, dim)) + learningTable(2) * lr * (bestPosition + secondPosition) / 2;
-            else if r1 <= p
-                indices = getRandIndex(i, searchAgentsNum, 1);
-                positions(i, :) = alpha * positions(i, :) + learningTable(1) * beta * (rand(1, dim) .* (ub - lb) + lb .* ones(1, dim)) + learningTable(2) * lr * positions(indices(1), :);
-            end
+            % Calculate DP values for better exploration/exploitation balance
+            [alpha, beta, lr] = dynamicProgramming(positions(i, :), bestPosition, meanPosition, fobj, fe, maxFes);
 
-            fitness(i) = fobj(positions(i, :));
-            fe = fe + 1;
-
-            if fitness(i) < bestFitness
-                secondFitness = bestFitness;
-                secondPosition = bestPosition;
-                bestFitness = fitness(i);
-                bestPosition = positions(i, :);
-                count = count + 2;
-            elseif fitness(i) < secondFitness
-                secondFitness = fitness(i);
-                secondPosition = positions(i, :);
+            % DP-based position update
+            if r1 <= p1
+                positions(i, :) = alpha * positions(i, :) + beta * (lb + (ub - lb) .* rand(1, numel(bestPosition))) + lr * (bestPosition - positions(i, :));
+            elseif r1 <= p1 + p2
+                positions(i, :) = alpha * positions(i, :) + beta * (lb + (ub - lb) .* rand(1, numel(bestPosition))) + lr * ((bestPosition + meanPosition) / 2 - positions(i, :));
+            elseif r1 <= p1 + p2 + p3
+                r2 = rand;
+                positions(i, :) = alpha * positions(i, :) + beta * (lb + (ub - lb) .* rand(1, numel(bestPosition))) - lr * (bestPosition - positions(i, :)) + r2 * Levy(dim);
             end
 
         end
 
-        if count > preCount
-            learningTable(1) = 1;
-        elseif count < preCount
-
-            if learningTable(1) == 2
-                learningTable(2) = -1 * learningTable(2);
-            end
-
-            learningTable(1) = 2;
-        end
-
-        for i = 1:size(positions, 1)
-            r2 = rand;
-
-            if r2 >= count / (searchAgentsNum * 2)
-                positions(i, :) = positions(i, :) .* Levy(dim);
-            else
-                r3 = rand;
-                indices = getRandIndex(i, searchAgentsNum, 4);
-                positionRand1 = positions(indices(1), :);
-                positionRand2 = positions(indices(2), :);
-                positionRand3 = positions(indices(3), :);
-                positionRand4 = positions(indices(4), :);
-                positions(i, :) = positions(i, :) + r3 * (positionRand1 - positionRand2) + (1 - r3) * (positionRand3 - positionRand4);
-            end
-
-        end
-
-        preCount = count;
         t = t + 1;
         convergenceCurve(t) = bestFitness;
-
     end
 
 end
 
-function [k] = getRandIndex(idx, n, count)
+% Dynamic programming function to adjust alpha, beta, lr dynamically
+function [alpha, beta, lr] = dynamicProgramming(currentPosition, bestPosition, meanPosition, fobj, currentFe, maxFes)
+    % Example DP function to decide alpha, beta, lr based on the current state
+    % and the iteration progress.
 
-    for i = 1:count
-        k(i) = rand([1, n]);
+    % Define the state variables based on current search phase
+    progress = currentFe / maxFes;
 
-        while k(i) == i
-            k(i) = rand([1, n]);
-        end
-
+    % Dynamic adjustment of parameters based on the current iteration progress
+    if progress <= 1/3
+        alpha = 0.8;
+        beta = 0.5;
+        lr = 0.05;
+    elseif progress <= 2/3
+        alpha = 0.6;
+        beta = 0.3;
+        lr = 0.05;
+    else
+        alpha = 0.4;
+        beta = 0.1;
+        lr = 0.1;
     end
 
+    % Adjustments based on proximity to global best and mean position
+    % Example of a dynamic adjustment: the closer the position to the global best, the smaller the lr (learning rate).
+    distanceToBest = norm(currentPosition - bestPosition);
+    lr = lr * (1 + exp(-distanceToBest)); % Dynamic scaling of lr
+
+    % Return the DP values
+end
+
+function [p1, p2, p3] = adjustR(t)
+    % Define the nodes
+    t0 = 0; % Initial iteration (start)
+    t1 = 0.5; % Midway point (middle)
+    t2 = 1; % Final iteration (end)
+
+    % Define the values for each node
+    p1_0 = 0.6; p2_0 = 0.2; p3_0 = 0.2;
+    p1_1 = 0.2; p2_1 = 0.6; p3_1 = 0.2;
+    p1_2 = 0.2; p2_2 = 0.2; p3_2 = 0.6;
+
+    % Calculate p1, p2, p3 using Lagrange interpolation
+    p1 = p1_0 * ((t - t1) * (t - t2)) / ((t0 - t1) * (t0 - t2)) + ...
+        p1_1 * ((t - t0) * (t - t2)) / ((t1 - t0) * (t1 - t2)) + ...
+        p1_2 * ((t - t0) * (t - t1)) / ((t2 - t0) * (t2 - t1));
+
+    p2 = p2_0 * ((t - t1) * (t - t2)) / ((t0 - t1) * (t0 - t2)) + ...
+        p2_1 * ((t - t0) * (t - t2)) / ((t1 - t0) * (t1 - t2)) + ...
+        p2_2 * ((t - t0) * (t - t1)) / ((t2 - t0) * (t2 - t1));
+
+    p3 = p3_0 * ((t - t1) * (t - t2)) / ((t0 - t1) * (t0 - t2)) + ...
+        p3_1 * ((t - t0) * (t - t2)) / ((t1 - t0) * (t1 - t2)) + ...
+        p3_2 * ((t - t0) * (t - t1)) / ((t2 - t0) * (t2 - t1));
 end

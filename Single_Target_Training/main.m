@@ -19,8 +19,8 @@ fold = 3;
 %% Algorithm Select
 % Select the algorithm to be trained
 % Please do not select more than 13 algorithms
-algorithmName = {'DEAHHO_version5', 'SCA'};
-remarkStr = 'versionPK';
+algorithmName = {'DP', 'DE', 'HHO', 'WOA', 'PSO', 'SCA'};
+remarkStr = 'versionpk';
 
 %% Select training data set
 % 1-23 is the CEC05 function set
@@ -47,7 +47,6 @@ functionNameList = {'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10',
 % CEC2019
 % dataSetName = 'CEC19';
 % functionNameList = {'F142', 'F143', 'F144', 'F145', 'F146', 'F147', 'F148', 'F149', 'F150', 'F151'};
-
 isOutput = false;
 
 % Prepare output preprocessing
@@ -83,18 +82,21 @@ for functionNum = 1:size(functionNameList, 2)
     % Benchmark function
     resultCurves = zeros(algorithmNum, fold, numOfRecord);
 
-    for cfold = 1:fold
+    tic
+
+    % for cfold = 1:fold
+    parfor cfold = 1:fold
 
         for cnum = 1:algorithmNum
-            tic
             disp(['fold', num2str(cfold), '_', dataSetName, ':The ', algorithmName{cnum}, ' algorithm is trainning...']);
             algorithm = str2func(algorithmName{cnum});
             [~, ~, curve] = algorithm(searchAgentsNum, maxFes, lb, ub, dim, fobj);
             resultCurves(cnum, cfold, :) = uniformSampling(curve, numOfRecord);
-            toc
         end
 
     end
+
+    toc
 
     % Write data to excel sheet
     algorithmNamLabels = cell(algorithmNum * fold, 1);
@@ -179,8 +181,8 @@ for functionNum = 1:size(functionNameList, 2)
     axis tight
     %     grid on
     %     box on
-    saveas(gcf, [fileName, '-', functionName, '-carve'], 'fig')
-    fileName1 = [fileName, '-', functionName, '-carve'];
+    saveas(gcf, [fileName, '_', functionName, '_carve'], 'fig')
+    fileName1 = [fileName, '_', functionName, '_carve'];
     print(fileName1, '-dtiff', '-r300'); %<-Save as PNG with 300 DPI
 
 end
