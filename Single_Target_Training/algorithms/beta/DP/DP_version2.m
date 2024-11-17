@@ -44,9 +44,9 @@ function [bestFitness, bestPosition, convergenceCurve] = DP(searchAgentsNum, max
             if r1 < exploreRatio
                 % Perform global search with random perturbations
                 if r2 < 0.5
-                    newPosition = positions(i, :) + lr * (bestPosition - positions(i, :)) + alpha * (lb + (ub - lb) * rand(1, dim)) + beta * Levy(dim);
+                    newPosition = positions(i, :) + lr * (bestPosition - positions(i, :)) + alpha * (lb + (ub - lb) .* rand(1, dim)) + beta .* Levy(dim);
                 else
-                    newPosition = positions(i, :) + lr * (historyBestPositions(i, :) - positions(i, :)) + alpha * (lb + (ub - lb) * rand(1, dim)) + beta * Levy(dim);
+                    newPosition = positions(i, :) + lr * (historyBestPositions(i, :) - positions(i, :)) + alpha * (lb + (ub - lb) .* rand(1, dim)) + beta .* Levy(dim);
                 end
 
             elseif r1 < exploreRatio + exploitRatio
@@ -56,17 +56,19 @@ function [bestFitness, bestPosition, convergenceCurve] = DP(searchAgentsNum, max
                 randPosition2 = positions(randIdx(2), :);
 
                 if r2 < 0.5
-                    newPosition = positions(i, :) + lr * (bestPosition - positions(i, :)) + alpha * (lb + (ub - lb) * rand(1, dim)) + beta * (randPosition1 - randPosition2);
+                    newPosition = positions(i, :) + lr * (bestPosition - positions(i, :)) + alpha * (lb + (ub - lb) .* rand(1, dim)) + beta * (randPosition1 - randPosition2);
                 else
-                    newPosition = positions(i, :) + lr * (historyBestPositions - positions(i, :)) + alpha * (lb + (ub - lb) * rand(1, dim)) + beta * (randPosition1 - randPosition2);
+                    newPosition = positions(i, :) + lr * (historyBestPositions(i, :) - positions(i, :)) + alpha * (lb + (ub - lb) .* rand(1, dim)) + beta * (randPosition1 - randPosition2);
                 end
 
             else
                 % Perform perturbation with Levy flights if stuck in local optimum
+                r3 = 2 * rand - 1;
+
                 if r2 < 0.5
-                    newPosition = bestPosition + lr * (historyBestPositions(i, :) - positions(i, :)) + alpha * (lb + (ub - lb) * rand(1, dim)) + beta * r3 * positions(i, :);
+                    newPosition = bestPosition + lr * (historyBestPositions(i, :) - positions(i, :)) + alpha * (lb + (ub - lb) .* rand(1, dim)) + beta * r3 * positions(i, :);
                 else
-                    newPosition = historyBestPositions(i, :) + lr * (bestPosition - positions(i, :)) + alpha * (lb + (ub - lb) * rand(1, dim)) + beta * r3 * positions(i, :);
+                    newPosition = historyBestPositions(i, :) + lr * (bestPosition - positions(i, :)) + alpha * (lb + (ub - lb) .* rand(1, dim)) + beta * r3 * positions(i, :);
                 end
 
             end
@@ -97,7 +99,7 @@ function [bestFitness, bestPosition, convergenceCurve] = DP(searchAgentsNum, max
                 r4 = 2 * rand - 1;
                 positions(i, :) = positions(i, :) + r4 .* Levy(dim);
             else
-                positions(i, :) = positions(i, :) + sqrt(2) * rand(1, dim);
+                positions(i, :) = positions(i, :) + sqrt(2) .* randn(1, dim);
             end
 
         end
@@ -112,11 +114,11 @@ function [exploreRatio, exploitRatio] = dynamicPlanning(fe, maxFes)
     progress = fe / maxFes;
 
     if progress <= 1/3
-        exploreRatio = 0.7; exploitRatio = 0.2;
+        exploreRatio = 0.8; exploitRatio = 0.15;
     elseif progress <= 2/3
-        exploreRatio = 0.5; exploitRatio = 0.3;
+        exploreRatio = 0.5; exploitRatio = 0.4;
     else
-        exploreRatio = 0.2; exploitRatio = 0.4;
+        exploreRatio = 0.3; exploitRatio = 0.6;
     end
 
 end
@@ -129,17 +131,17 @@ function [lr, alpha, beta] = dynamicPhaseAdjustment(fe, maxFes)
     progress = fe / maxFes;
 
     if progress <= 1/3
-        lr = 0.1;
-        alpha = 0.5;
-        beta = 0.8;
+        lr = 0.5;
+        alpha = 0.6;
+        beta = 0.9;
     elseif progress <= 2/3
-        lr = 0.2;
-        alpha = 0.3;
-        beta = 0.7;
+        lr = 0.3;
+        alpha = 0.4;
+        beta = 0.6;
     else
-        lr = 0.01;
-        alpha = 0.7;
-        beta = 0.5;
+        lr = 0.1;
+        alpha = 0.2;
+        beta = 0.4;
     end
 
 end
