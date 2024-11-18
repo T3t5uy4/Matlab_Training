@@ -1,5 +1,5 @@
 % The Harris hawks optimization Algorithm
-function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version6(searchAgentsNum, maxFes, lb, ub, dim, fobj)
+function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version7(searchAgentsNum, maxFes, lb, ub, dim, fobj)
     % Initialize position vector and fitness for the best
     bestFitness = inf;
     bestPosition = zeros(1, dim);
@@ -12,7 +12,6 @@ function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version6(searchA
     t = 0;
     fe = 0;
     F = 0.5; % Scaling factor
-    CR = 0.9; % Crossover probability
 
     while fe < maxFes
 
@@ -107,14 +106,13 @@ function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version6(searchA
 
             r = rand;
             feNorm = fe / maxFes;
-            p1 = 2 * ((1 - feNorm) ^ 3) / 3;
+            p1 = 2 * ((1 - feNorm) ^ 2) / 3;
             p2 = (2 * (feNorm ^ 2) * (1 - feNorm) + 1) / 3;
-            CR = 1 - 0.3 * (1 - fe / maxFes);
 
             if r <= p1
                 % DE_rand
                 % Select three random indices
-                indices = randperm(searchAgentsNum, 3);
+                indices = getRandIndex(i, searchAgentsNum, 3);
                 positionRand1 = positions(indices(1), :);
                 positionRand2 = positions(indices(2), :);
                 positionRand3 = positions(indices(3), :);
@@ -125,7 +123,7 @@ function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version6(searchA
             elseif r <= p1 + p2
                 % DE_currentToBest
                 % Select two random indices
-                indices = randperm(searchAgentsNum, 2);
+                indices = getRandIndex(i, searchAgentsNum, 2);
                 positionRand1 = positions(indices(1), :);
                 positionRand2 = positions(indices(2), :);
 
@@ -136,7 +134,7 @@ function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version6(searchA
             else
                 % DE_currentToBest
                 % Select two random indices
-                indices = randperm(searchAgentsNum, 2);
+                indices = getRandIndex(i, searchAgentsNum, 2);
                 positionRand1 = positions(indices(1), :);
                 positionRand2 = positions(indices(2), :);
 
@@ -148,7 +146,10 @@ function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version6(searchA
 
             % Crossover
             trial = positions(i, :);
+            mutantFitness = fobj(mutant);
+            fe = fe + 1;
             j_rand = randi(dim); % Random index for crossover
+            CR = 1 - 0.2 * (fitness(i) / (fitness(i) + mutantFitness +1e-5));
 
             for j = 1:dim
 
@@ -157,6 +158,8 @@ function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version6(searchA
                 end
 
             end
+
+            trial = trial .* Levy(dim);
 
             % Selection
             trialFitness = fobj(trial);
@@ -171,6 +174,20 @@ function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version6(searchA
 
         t = t + 1;
         convergenceCurve(t) = bestFitness;
+
+    end
+
+end
+
+function [k] = getRandIndex(i, n, count)
+    k = zeros(1, count);
+
+    for i = 1:count
+        k(i) = randi([1, n]);
+
+        while k(i) == i
+            k(i) = randi([1, n]);
+        end
 
     end
 

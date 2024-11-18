@@ -14,12 +14,12 @@ dim = 30;
 % Maximum number of iterations, recommended maximum training is 300,000
 maxFes = 300000;
 % Fold is recommended to be set to 30
-fold = 3;
+fold = 30;
 
 %% Algorithm Select
 % Select the algorithm to be trained
 % Please do not select more than 13 algorithms
-algorithmName = {'DP_version3', 'DP_version2', 'DP_version1', 'HHO', 'DE', 'PSO', 'ABC', 'WOA', 'SCA', 'RUN', 'BA', 'MFO'};
+algorithmName = {'DEAHHO', 'DE', 'HHO', 'WOA', 'SCA', 'PSO', 'ABC', 'ALCPSO', 'SHADE', 'CLPSO', 'SADE', 'LSHADE'};
 remarkStr = 'versionpk';
 
 %% Select training data set
@@ -36,17 +36,18 @@ remarkStr = 'versionpk';
 % dataSetName = 'CEC13';
 % functionNameList = {'F24', 'F25', 'F26', 'F27', 'F28', 'F29', 'F30', 'F31', 'F32', 'F33', 'F34', 'F35', 'F36', 'F37', 'F38', 'F39', 'F40', 'F41', 'F42', 'F43', 'F44', 'F45', 'F46', 'F47', 'F48', 'F49', 'F50', 'F51'};
 % CEC2014
-% dataSetName = 'CEC14';
-% functionNameList = {'F52', 'F53', 'F54', 'F55', 'F56', 'F57', 'F58', 'F59', 'F60', 'F61', 'F62', 'F63', 'F64', 'F65', 'F66', 'F67', 'F68', 'F69', 'F70', 'F71', 'F72', 'F73', 'F74', 'F75', 'F76', 'F77', 'F78', 'F79', 'F80', 'F81'};
+dataSetName = 'CEC14';
+functionNameList = {'F52', 'F53', 'F54', 'F55', 'F56', 'F57', 'F58', 'F59', 'F60', 'F61', 'F62', 'F63', 'F64', 'F65', 'F66', 'F67', 'F68', 'F69', 'F70', 'F71', 'F72', 'F73', 'F74', 'F75', 'F76', 'F77', 'F78', 'F79', 'F80', 'F81'};
 % CEC2017
-dataSetName = 'CEC17';
-functionNameList = {'F82', 'F84', 'F85', 'F86', 'F87', 'F88', 'F89', 'F90', 'F91', 'F92', 'F93', 'F94', 'F95', 'F96', 'F97', 'F98', 'F99', 'F100', 'F101', 'F102', 'F103', 'F104', 'F105', 'F106', 'F107', 'F108', 'F109', 'F110', 'F111'};
+% dataSetName = 'CEC17';
+% functionNameList = {'F82', 'F84', 'F85', 'F86', 'F87', 'F88', 'F89', 'F90', 'F91', 'F92', 'F93', 'F94', 'F95', 'F96', 'F97', 'F98', 'F99', 'F100', 'F101', 'F102', 'F103', 'F104', 'F105', 'F106', 'F107', 'F108', 'F109', 'F110', 'F111'};
 % CEC 2018
 % dataSetName = 'CEC18';
 % functionNameList = {'F112', 'F114', 'F115', 'F116', 'F117', 'F118', 'F119', 'F120', 'F121', 'F122', 'F123', 'F124', 'F125', 'F126', 'F127', 'F128', 'F129', 'F130', 'F131', 'F132', 'F133', 'F134', 'F135', 'F136', 'F137', 'F138', 'F139', 'F140', 'F141'};
 % CEC2019
 % dataSetName = 'CEC19';
 % functionNameList = {'F142', 'F143', 'F144', 'F145', 'F146', 'F147', 'F148', 'F149', 'F150', 'F151'};
+
 isOutput = false;
 
 % Prepare output preprocessing
@@ -82,21 +83,18 @@ for functionNum = 1:size(functionNameList, 2)
     % Benchmark function
     resultCurves = zeros(algorithmNum, fold, numOfRecord);
 
-    tic
-
     for cfold = 1:fold
-        % parfor cfold = 1:fold
 
-        for cnum = 1:algorithmNum
+        parfor cnum = 1:algorithmNum
+            tic
             disp(['fold', num2str(cfold), '_', dataSetName, ':The ', algorithmName{cnum}, ' algorithm is trainning...']);
             algorithm = str2func(algorithmName{cnum});
             [~, ~, curve] = algorithm(searchAgentsNum, maxFes, lb, ub, dim, fobj);
             resultCurves(cnum, cfold, :) = uniformSampling(curve, numOfRecord);
+            toc
         end
 
     end
-
-    toc
 
     % Write data to excel sheet
     algorithmNamLabels = cell(algorithmNum * fold, 1);
@@ -181,8 +179,8 @@ for functionNum = 1:size(functionNameList, 2)
     axis tight
     %     grid on
     %     box on
-    saveas(gcf, [fileName, '_', functionName, '_carve'], 'fig')
-    fileName1 = [fileName, '_', functionName, '_carve'];
+    saveas(gcf, [fileName, '-', functionName, '-carve'], 'fig')
+    fileName1 = [fileName, '-', functionName, '-carve'];
     print(fileName1, '-dtiff', '-r300'); %<-Save as PNG with 300 DPI
 
 end

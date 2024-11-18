@@ -1,4 +1,4 @@
-function [bestFitness, bestPosition, convergenceCurve] = DP(searchAgentsNum, maxFes, lb, ub, dim, fobj)
+function [bestFitness, bestPosition, convergenceCurve] = DP_version1(searchAgentsNum, maxFes, lb, ub, dim, fobj)
     bestFitness = inf;
     bestPosition = zeros(1, dim);
     positions = initialization(searchAgentsNum, dim, ub, lb);
@@ -35,7 +35,7 @@ function [bestFitness, bestPosition, convergenceCurve] = DP(searchAgentsNum, max
         [exploreRatio, exploitRatio] = dynamicPlanning(fe, maxFes);
 
         % Adjust alpha, beta, and lr dynamically
-        [alpha, beta, lr] = dynamicPhaseAdjustment(fe, maxFes);
+        [lr, alpha, beta] = dynamicPhaseAdjustment(fe, maxFes);
 
         for i = 1:size(positions, 1)
             r1 = rand * (fe / maxFes);
@@ -44,21 +44,13 @@ function [bestFitness, bestPosition, convergenceCurve] = DP(searchAgentsNum, max
             if r1 < exploreRatio
                 % Perform global search with random perturbations
                 if r2 < 0.5
-                    newPosition = lr * positions(i, :) + alpha * (lb + (ub - lb) .* randn(1, dim)) + beta * bestPosition;
+                    newPosition = positions(i, :) + lr * (bestPosition - positions(i, :)) + alpha * (lb + (ub - lb) .* rand(1, dim)) + beta .* Levy(dim);
                 else
-                    newPosition = lr * positions(i, :) + alpha * (lb + (ub - lb) .* randn(1, dim)) + beta * historyBestPositions(i, :);
+                    newPosition = positions(i, :) + lr * (historyBestPositions(i, :) - positions(i, :)) + alpha * (lb + (ub - lb) .* rand(1, dim)) + beta .* Levy(dim);
                 end
 
             elseif r1 < exploreRatio + exploitRatio
                 % Perform local search with some global perturbation
-                % randIdx = getRandIndex(i, searchAgentsNum, 1);
-                % randPosition = positions(randIdx(1), :);
-
-                % if r2 < 0.5
-                %     newPosition = lr * positions(i, :) + alpha * (lb + (ub - lb) .* randn(1, dim)) + beta * (bestPosition - randPosition);
-                % else
-                %     newPosition = lr * positions(i, :) + alpha * (lb + (ub - lb) .* randn(1, dim)) + beta * (historyBestPositions(i, :) - randPosition);
-                % end
                 randIdx = getRandIndex(i, searchAgentsNum, 2);
                 randPosition1 = positions(randIdx(1), :);
                 randPosition2 = positions(randIdx(2), :);
@@ -71,15 +63,12 @@ function [bestFitness, bestPosition, convergenceCurve] = DP(searchAgentsNum, max
 
             else
                 % Perform perturbation with Levy flights if stuck in local optimum
-                r3 = rand;
-                randIdx = getRandIndex(i, searchAgentsNum, 2);
-                randPosition1 = positions(randIdx(1), :);
-                randPosition2 = positions(randIdx(2), :);
+                r3 = 2 * rand - 1;
 
                 if r2 < 0.5
-                    newPosition = lr * positions(i, :) + alpha * (randPosition1 - randPosition2) + beta * bestPosition + r3 .* Levy(dim);
+                    newPosition = bestPosition + lr * (historyBestPositions(i, :) - positions(i, :)) + alpha * (lb + (ub - lb) .* rand(1, dim)) + beta * r3 * positions(i, :);
                 else
-                    newPosition = lr * positions(i, :) + alpha * (randPosition1 - randPosition2) + beta * historyBestPositions(i, :) + r3 .* Levy(dim);
+                    newPosition = historyBestPositions(i, :) + lr * (bestPosition - positions(i, :)) + alpha * (lb + (ub - lb) .* rand(1, dim)) + beta * r3 * positions(i, :);
                 end
 
             end
@@ -125,11 +114,11 @@ function [exploreRatio, exploitRatio] = dynamicPlanning(fe, maxFes)
     progress = fe / maxFes;
 
     if progress <= 1/3
-        exploreRatio = 0.7; exploitRatio = 0.2;
+        exploreRatio = 0.8; exploitRatio = 0.15;
     elseif progress <= 2/3
-        exploreRatio = 0.3; exploitRatio = 0.4;
+        exploreRatio = 0.5; exploitRatio = 0.4;
     else
-        exploreRatio = 0.1; exploitRatio = 0.2;
+        exploreRatio = 0.3; exploitRatio = 0.6;
     end
 
 end

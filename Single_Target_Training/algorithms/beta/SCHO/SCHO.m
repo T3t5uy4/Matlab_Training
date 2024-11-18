@@ -36,8 +36,9 @@ function [bestFitness, bestPosition, convergenceCurve] = SCHO(N, maxFes, lb, ub,
 
     convergenceCurve(1) = bestFitness;
     t = 2;
+    fe = 0;
     %Main loop
-    while t <= maxFes
+    while fe <= maxFes
 
         for i = 1:size(X, 1) % in i-th solution
 

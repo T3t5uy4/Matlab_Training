@@ -5,9 +5,11 @@ function [bestFitness, bestPosition, Convergence_curve] = RUN(searchAgentsNum, m
     Xnew2 = zeros(1, dim);
 
     Convergence_curve = zeros(1, maxIters);
+    fe = 0;
 
     for i = 1:searchAgentsNum
         Cost(i) = fobj(X(i, :)); % Calculate the Value of Objective Function
+        fe = fe + 1;
     end
 
     [bestFitness, ind] = min(Cost); % Determine the Best Solution
@@ -18,7 +20,7 @@ function [bestFitness, bestPosition, Convergence_curve] = RUN(searchAgentsNum, m
     %% Main Loop of RUN
     it = 1; %Number of iterations
 
-    while it < maxIters
+    while fe < maxIters
         it = it + 1;
         f = 20 .* exp(- (12 .* (it / maxIters))); % (Eq.17.6)
         Xavg = mean(X); % Determine the Average of Solutions
@@ -68,6 +70,7 @@ function [bestFitness, bestPosition, Convergence_curve] = RUN(searchAgentsNum, m
             % Check if solutions go outside the search space and bring them back
             FU = Xnew > ub; FL = Xnew < lb; Xnew = (Xnew .* (~(FU + FL))) + ub .* FU + lb .* FL;
             CostNew = fobj(Xnew);
+            fe = fe + 1;
 
             if CostNew < Cost(i)
                 X(i, :) = Xnew;
@@ -100,6 +103,7 @@ function [bestFitness, bestPosition, Convergence_curve] = RUN(searchAgentsNum, m
 
                 FU = Xnew2 > ub; FL = Xnew2 < lb; Xnew2 = (Xnew2 .* (~(FU + FL))) + ub .* FU + lb .* FL;
                 CostNew = fobj(Xnew2);
+                fe = fe + 1;
 
                 if CostNew < Cost(i)
                     X(i, :) = Xnew2;
@@ -112,6 +116,7 @@ function [bestFitness, bestPosition, Convergence_curve] = RUN(searchAgentsNum, m
 
                         FU = Xnew > ub; FL = Xnew < lb; Xnew = (Xnew .* (~(FU + FL))) + ub .* FU + lb .* FL;
                         CostNew = fobj(Xnew);
+                        fe = fe + 1;
 
                         if CostNew < Cost(i)
                             X(i, :) = Xnew;
@@ -135,7 +140,7 @@ function [bestFitness, bestPosition, Convergence_curve] = RUN(searchAgentsNum, m
 
         % Save Best Solution at each iteration
         Convergence_curve(it) = bestFitness;
-        disp(['it : ' num2str(it) ', Best Cost = ' num2str(Convergence_curve(it))]);
+        % disp(['it : ' num2str(it) ', Best Cost = ' num2str(Convergence_curve(it))]);
 
     end
 
