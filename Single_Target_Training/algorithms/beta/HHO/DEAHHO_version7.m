@@ -12,7 +12,6 @@ function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version7(searchA
     t = 0;
     fe = 0;
     F = 0.5; % Scaling factor
-    CR = 0.9; % Crossover probability
 
     while fe < maxFes
 
@@ -109,6 +108,7 @@ function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version7(searchA
             feNorm = fe / maxFes;
             p1 = (exp(-feNorm) - exp(feNorm) + exp(1) - exp(-1)) / 3;
             p2 = 1 - (exp(- (feNorm - 0.5)) + exp(feNorm - 0.5)) / 3;
+            CR = 1 - 0.3 * (1 - fe / maxFes);
 
             if r <= p1
                 % DE_rand
