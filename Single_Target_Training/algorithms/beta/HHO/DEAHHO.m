@@ -1,5 +1,5 @@
 % The Harris hawks optimization Algorithm
-function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version6(searchAgentsNum, maxFes, lb, ub, dim, fobj)
+function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version7(searchAgentsNum, maxFes, lb, ub, dim, fobj)
     % Initialize position vector and fitness for the best
     bestFitness = inf;
     bestPosition = zeros(1, dim);
@@ -12,7 +12,6 @@ function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version6(searchA
     t = 0;
     fe = 0;
     F = 0.5; % Scaling factor
-    CR = 0.9; % Crossover probability
 
     while fe < maxFes
 
@@ -107,8 +106,8 @@ function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version6(searchA
 
             r = rand;
             feNorm = fe / maxFes;
-            p1 = 2 * ((1 - feNorm) ^ 3) / 3;
-            p2 = (2 * (feNorm ^ 2) * (1 - feNorm) + 1) / 3;
+            p1 = (exp(-feNorm) - exp(feNorm) + exp(1) - exp(-1)) / 3;
+            p2 = 1 - (exp(- (feNorm - 0.5)) + exp(feNorm - 0.5)) / 3;
             CR = 1 - 0.3 * (1 - fe / maxFes);
 
             if r <= p1
@@ -131,7 +130,6 @@ function [bestFitness, bestPosition, convergenceCurve] = DEAHHO_version6(searchA
 
                 % Mutation
                 mutant = positions(i, :) + (positionRand1 - positionRand2) .* Levy(dim);
-                mutant = max(min(mutant, ub), lb); % Ensure within bounds
                 mutant = max(min(mutant, ub), lb); % Ensure within bounds
             else
                 % DE_currentToBest
