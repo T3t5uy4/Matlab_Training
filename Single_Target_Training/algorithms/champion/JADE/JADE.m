@@ -59,7 +59,7 @@ function [fes, GBEST, convergence] = JADE(SearchAgents_no, MaxFEs, lb, ub, dim, 
     %% the values and indices of the best solutions
     [valBest, indBest] = sort(valParents, 'ascend');
 
-    % FES=0;
+    % FES = 0;
     l = 1;
     % while FES < n * 10000 %& min(fit)>error_value(problem)
     while fes < MaxFEs

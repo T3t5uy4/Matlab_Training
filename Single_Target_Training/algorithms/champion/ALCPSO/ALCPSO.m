@@ -49,12 +49,13 @@ function [lb, ub, convergence] = ALCPSO(SearchAgents_no, Max_iteration, lb, ub, 
 
     gen = 0;
     % FES = 0; maxFES = D * 10000;
-    % convergence = [];  % record the best results
-    convergence = zeros(1, Max_iteration);
+    convergence = []; % record the best results
+    % convergence = zeros(1, Max_iteration);
     outcome_lifespan = lifespan * ones(popsize, 1);
     l = 1;
+    fe = 0;
     % while FES < maxFES
-    while l < Max_iteration + 1
+    while fe < Max_iteration
 
         % == == == == == Step 2 Velocity and Position Updating == == == == == %
         V = w * V + c1 * rand(popsize, D) .* (pBest - X) + c2 * rand(popsize, D) .* (repmat(Leader, popsize, 1) - X);
@@ -67,6 +68,7 @@ function [lb, ub, convergence] = ALCPSO(SearchAgents_no, Max_iteration, lb, ub, 
 
         for i = 1:size(X, 1)
             val_X(i) = fobj(X(i, :));
+            fe = fe + 1;
         end
 
         %     FES = FES+popsize;
@@ -119,6 +121,7 @@ function [lb, ub, convergence] = ALCPSO(SearchAgents_no, Max_iteration, lb, ub, 
             rr = rand(1, D);
             Challenger(Index) = Xmin(Index) + rr(Index) .* (Xmax(Index) - Xmin(Index));
             val_Challenger = fobj(Challenger);
+            fe = fe + 1;
             %         FES = FES+1;
             if val_Challenger < val_gBest
                 gBest = Challenger; val_gBest = val_Challenger;
@@ -136,6 +139,7 @@ function [lb, ub, convergence] = ALCPSO(SearchAgents_no, Max_iteration, lb, ub, 
 
                 for i = 1:size(X, 1)
                     val_X(i) = fobj(X(i, :));
+                    fe = fe + 1;
                 end
 
                 %             FES = FES+popsize;

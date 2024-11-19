@@ -19,7 +19,7 @@ fold = 3;
 %% Algorithm Select
 % Select the algorithm to be trained
 % Please do not select more than 13 algorithms
-algorithmName = {'DP_version3', 'DP_version2', 'DP_version1', 'HHO', 'DE', 'PSO', 'ABC', 'WOA', 'SCA', 'RUN', 'BA', 'MFO'};
+algorithmName = {'DEAHHO_version7', 'DEAHHO_version6', 'HHO', 'DE', 'ALCPSO', 'ABC'};
 remarkStr = 'versionpk';
 
 %% Select training data set
