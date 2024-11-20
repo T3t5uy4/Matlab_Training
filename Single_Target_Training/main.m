@@ -14,12 +14,12 @@ dimValue = 30;
 % Maximum number of iterations, recommended maximum training is 300,000
 maxFes = 300000;
 % Fold is recommended to be set to 30
-fold = 30;
+fold = 3;
 
 %% Algorithm Select
 % Select the algorithm to be trained
 % Please do not select more than 13 algorithms
-algorithmName = {'DP_version4', 'DP_version3', 'DP_version2', 'DP_version1', 'HHO', 'DE', 'PSO', 'ABC', 'RUN', 'BA', 'ALO', 'GWO', 'GA', 'MFO', 'WOA', 'SCA', 'SCHO'};
+algorithmName = {'DEAHHO_version7', 'DEAHHO_version6', 'HHO', 'DE', 'ALCPSO', 'ABC'};
 remarkStr = 'versionpk';
 
 %% Select training data set
