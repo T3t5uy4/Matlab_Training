@@ -1219,123 +1219,153 @@ end
 
 %% CEC2014
 function o = F52(x)
-    o = cec14_func(x', 1);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 1);
 end
 
 function o = F53(x)
-    o = cec14_func(x', 2);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 2);
 end
 
 function o = F54(x)
-    o = cec14_func(x', 3);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 3);
 end
 
 function o = F55(x)
-    o = cec14_func(x', 4);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 4);
 end
 
 function o = F56(x)
-    o = cec14_func(x', 5);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 5);
 end
 
 function o = F57(x)
-    o = cec14_func(x', 6);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 6);
 end
 
 function o = F58(x)
-    o = cec14_func(x', 7);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 7);
 end
 
 function o = F59(x)
-    o = cec14_func(x', 8);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 8);
 end
 
 function o = F60(x)
-    o = cec14_func(x', 9);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 9);
 end
 
 function o = F61(x)
-    o = cec14_func(x', 10);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 10);
 end
 
 function o = F62(x)
-    o = cec14_func(x', 11);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 11);
 end
 
 function o = F63(x)
-    o = cec14_func(x', 12);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 12);
 end
 
 function o = F64(x)
-    o = cec14_func(x', 13);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 13);
 end
 
 function o = F65(x)
-    o = cec14_func(x', 14);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 14);
 end
 
 function o = F66(x)
-    o = cec14_func(x', 15);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 15);
 end
 
 function o = F67(x)
-    o = cec14_func(x', 16);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 16);
 end
 
 function o = F68(x)
-    o = cec14_func(x', 17);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 17);
 end
 
 function o = F69(x)
-    o = cec14_func(x', 18);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 18);
 end
 
 function o = F70(x)
-    o = cec14_func(x', 19);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 19);
 end
 
 function o = F71(x)
-    o = cec14_func(x', 20);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 20);
 end
 
 function o = F72(x)
-    o = cec14_func(x', 21);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 21);
 end
 
 function o = F73(x)
-    o = cec14_func(x', 22);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 22);
 end
 
 function o = F74(x)
-    o = cec14_func(x', 23);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 23);
 end
 
 function o = F75(x)
-    o = cec14_func(x', 24);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 24);
 end
 
 function o = F76(x)
-    o = cec14_func(x', 25);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 25);
 end
 
 function o = F77(x)
-    o = cec14_func(x', 26);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 26);
 end
 
 function o = F78(x)
-    o = cec14_func(x', 27);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 27);
 end
 
 function o = F79(x)
-    o = cec14_func(x', 28);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 28);
 end
 
 function o = F80(x)
-    o = cec14_func(x', 29);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 29);
 end
 
 function o = F81(x)
-    o = cec14_func(x', 30);
+    fhd = str2func('cec14_func');
+    o = feval(fhd, x', 30);
 end
 
 %% CEC2017

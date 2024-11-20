@@ -10,7 +10,7 @@ addpath(genpath(pwd));
 searchAgentsNum = 30;
 numOfRecord = 50;
 % population dimension
-dim = 30;
+dimValue = 30;
 % Maximum number of iterations, recommended maximum training is 300,000
 maxFes = 3000;
 

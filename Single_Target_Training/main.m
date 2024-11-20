@@ -10,16 +10,16 @@ addpath(genpath(pwd));
 searchAgentsNum = 30;
 numOfRecord = 40;
 % population dimension
-dim = 30;
+dimValue = 30;
 % Maximum number of iterations, recommended maximum training is 300,000
 maxFes = 300000;
 % Fold is recommended to be set to 30
-fold = 3;
+fold = 30;
 
 %% Algorithm Select
 % Select the algorithm to be trained
 % Please do not select more than 13 algorithms
-algorithmName = {'DEAHHO_version7', 'DEAHHO_version6', 'HHO', 'DE', 'ALCPSO', 'ABC'};
+algorithmName = {'DP_version4', 'DP_version3', 'DP_version2', 'DP_version1', 'HHO', 'DE', 'PSO', 'ABC', 'RUN', 'BA', 'ALO', 'GWO', 'GA', 'MFO', 'WOA', 'SCA', 'SCHO'};
 remarkStr = 'versionpk';
 
 %% Select training data set
@@ -39,14 +39,17 @@ remarkStr = 'versionpk';
 % dataSetName = 'CEC14';
 % functionNameList = {'F52', 'F53', 'F54', 'F55', 'F56', 'F57', 'F58', 'F59', 'F60', 'F61', 'F62', 'F63', 'F64', 'F65', 'F66', 'F67', 'F68', 'F69', 'F70', 'F71', 'F72', 'F73', 'F74', 'F75', 'F76', 'F77', 'F78', 'F79', 'F80', 'F81'};
 % CEC2017
-dataSetName = 'CEC17';
-functionNameList = {'F82', 'F84', 'F85', 'F86', 'F87', 'F88', 'F89', 'F90', 'F91', 'F92', 'F93', 'F94', 'F95', 'F96', 'F97', 'F98', 'F99', 'F100', 'F101', 'F102', 'F103', 'F104', 'F105', 'F106', 'F107', 'F108', 'F109', 'F110', 'F111'};
+% dataSetName = 'CEC17';
+% functionNameList = {'F82', 'F84', 'F85', 'F86', 'F87', 'F88', 'F89', 'F90', 'F91', 'F92', 'F93', 'F94', 'F95', 'F96', 'F97', 'F98', 'F99', 'F100', 'F101', 'F102', 'F103', 'F104', 'F105', 'F106', 'F107', 'F108', 'F109', 'F110', 'F111'};
 % CEC 2018
 % dataSetName = 'CEC18';
 % functionNameList = {'F112', 'F114', 'F115', 'F116', 'F117', 'F118', 'F119', 'F120', 'F121', 'F122', 'F123', 'F124', 'F125', 'F126', 'F127', 'F128', 'F129', 'F130', 'F131', 'F132', 'F133', 'F134', 'F135', 'F136', 'F137', 'F138', 'F139', 'F140', 'F141'};
 % CEC2019
 % dataSetName = 'CEC19';
 % functionNameList = {'F142', 'F143', 'F144', 'F145', 'F146', 'F147', 'F148', 'F149', 'F150', 'F151'};
+% CEC 051417
+dataSetName = 'CEC051417';
+functionNameList = {'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'F13', 'F14', 'F15', 'F16', 'F17', 'F18', 'F19', 'F20', 'F21', 'F22', 'F23', 'F52', 'F53', 'F54', 'F55', 'F56', 'F57', 'F58', 'F59', 'F60', 'F61', 'F62', 'F63', 'F64', 'F65', 'F66', 'F67', 'F68', 'F69', 'F70', 'F71', 'F72', 'F73', 'F74', 'F75', 'F76', 'F77', 'F78', 'F79', 'F80', 'F81', 'F82', 'F84', 'F85', 'F86', 'F87', 'F88', 'F89', 'F90', 'F91', 'F92', 'F93', 'F94', 'F95', 'F96', 'F97', 'F98', 'F99', 'F100', 'F101', 'F102', 'F103', 'F104', 'F105', 'F106', 'F107', 'F108', 'F109', 'F110', 'F111'};
 isOutput = false;
 
 % Prepare output preprocessing
@@ -55,7 +58,7 @@ dateStr = datestr(now, 'yyyy-mm-dd');
 timeStr = datestr(now, 'HH_MM_SS');
 % Set output directory name and file name
 algNameStr = algorithmName{1};
-dirName = ['output/', dateStr, '/', algNameStr, '_', remarkStr, '/', dataSetName, '_', timeStr, '_D=', num2str(dim), '_T=', num2str(maxFes), '_F=', num2str(fold)];
+dirName = ['output/', dateStr, '/', algNameStr, '_', remarkStr, '/', dataSetName, '_', timeStr, '_D=', num2str(dimValue), '_T=', num2str(maxFes), '_F=', num2str(fold)];
 mkdir(dirName);
 fileName = [dirName, '/', algNameStr];
 % Excel header definition
@@ -76,7 +79,7 @@ markers = repmat(basicMarkers, ceil(nLines / numel(basicMarkers)), 1);
 
 for functionNum = 1:size(functionNameList, 2)
     functionName = functionNameList{functionNum};
-    [lb, ub, dim, fobj] = getFunctions(functionName, dim);
+    [lb, ub, dim, fobj] = getFunctions(functionName, dimValue);
     disp(['----------------', functionName, '----------------']);
     functionName = ['F', num2str(functionNum)];
     % Benchmark function

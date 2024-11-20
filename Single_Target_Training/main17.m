@@ -10,7 +10,7 @@ addpath(genpath(pwd));
 searchAgentsNum = 30;
 numOfRecord = 40;
 % population dimension
-dim = 30;
+dimValue = 30;
 % Maximum number of iterations, recommended maximum training is 300,000
 maxFes = 300000;
 % Fold is recommended to be set to 30
@@ -56,7 +56,7 @@ dateStr = datestr(now, 'yyyy-mm-dd');
 timeStr = datestr(now, 'HH_MM_SS');
 % Set output directory name and file name
 algNameStr = algorithmName{1};
-dirName = ['output/', dateStr, '/', algNameStr, '_', remarkStr, '/', dataSetName, '_', timeStr, '_D=', num2str(dim), '_T=', num2str(maxFes), '_F=', num2str(fold)];
+dirName = ['output/', dateStr, '/', algNameStr, '_', remarkStr, '/', dataSetName, '_', timeStr, '_D=', num2str(dimValue), '_T=', num2str(maxFes), '_F=', num2str(fold)];
 mkdir(dirName);
 fileName = [dirName, '/', algNameStr];
 % Excel header definition
@@ -77,7 +77,7 @@ markers = repmat(basicMarkers, ceil(nLines / numel(basicMarkers)), 1);
 
 for functionNum = 1:size(functionNameList, 2)
     functionName = functionNameList{functionNum};
-    [lb, ub, dim, fobj] = getFunctions(functionName, dim);
+    [lb, ub, dim, fobj] = getFunctions(functionName, dimValue);
     disp(['----------------', functionName, '----------------']);
     functionName = ['F', num2str(functionNum)];
     % Benchmark function

@@ -1,4 +1,4 @@
-function [bestFitness, bestPosition, convergenceCurve] = DP_version3(searchAgentsNum, maxFes, lb, ub, dim, fobj)
+function [bestFitness, bestPosition, convergenceCurve] = DP_version4(searchAgentsNum, maxFes, lb, ub, dim, fobj)
     bestFitness = inf;
     bestPosition = zeros(1, dim);
     positions = initialization(searchAgentsNum, dim, ub, lb);
@@ -48,9 +48,9 @@ function [bestFitness, bestPosition, convergenceCurve] = DP_version3(searchAgent
             if r1 < exploreRatio
                 % Perform global search with random perturbations
                 if r2 < 0.5
-                    newPosition = lr * positions(i, :) + alpha * ((2 * rand - 1) * (ub - lb) .* rand(1, dim)) + beta * bestPosition;
+                    newPosition = lr * positions(i, :) + alpha * ((2 * rand - 1) * (ub - lb) .* rand(1, dim)) + beta * (2 * rand - 1) * bestPosition;
                 else
-                    newPosition = lr * positions(i, :) + alpha * ((2 * rand - 1) * (ub - lb) .* rand(1, dim)) + beta * historyBestPositions(i, :);
+                    newPosition = lr * positions(i, :) + alpha * ((2 * rand - 1) * (ub - lb) .* rand(1, dim)) + beta * (2 * rand - 1) * historyBestPositions(i, :);
                 end
 
             elseif r1 < exploreRatio + exploitRatio
@@ -81,9 +81,9 @@ function [bestFitness, bestPosition, convergenceCurve] = DP_version3(searchAgent
                 randPosition2 = positions(randIdx(2), :);
 
                 if r2 < 0.5
-                    newPosition = lr * positions(i, :) + alpha * (randPosition1 - randPosition2) + beta * bestPosition + r3 * mean(positions);
+                    newPosition = lr * positions(i, :) + alpha * (randPosition1 - randPosition2) + beta * (2 * rand - 1) * bestPosition + r3 * mean(positions);
                 else
-                    newPosition = lr * positions(i, :) + alpha * (randPosition1 - randPosition2) + beta * historyBestPositions(i, :) + r3 * mean(positions);
+                    newPosition = lr * positions(i, :) + alpha * (randPosition1 - randPosition2) + beta * (2 * rand - 1) * historyBestPositions(i, :) + r3 * mean(positions);
                 end
 
             end
@@ -112,12 +112,12 @@ function [bestFitness, bestPosition, convergenceCurve] = DP_version3(searchAgent
             distanceToBest = norm(positions(i, :) - bestPosition);
 
             if distanceToBest > epsilon % Assume a distance threshold.
-                r4 = (exp(t / maxFes) + exp(-t / maxFes)) / 2;
+                r4 = (exp(1 + (t / maxFes)) + exp(1 - (t / maxFes))) / 2;
             else
-                r4 = (exp(t / maxFes) - exp(-t / maxFes)) / 2;
+                r4 = (exp(1 + (t / maxFes)) - exp(1 - (t / maxFes))) / 2;
             end
 
-            positions(i, :) = positions(i, :) + r4 .* Levy(dim);
+            positions(i, :) = positions(i, :) + cos(r4) .* Levy(dim);
 
         end
 

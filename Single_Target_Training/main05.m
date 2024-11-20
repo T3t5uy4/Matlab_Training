@@ -10,7 +10,7 @@ addpath(genpath(pwd));
 searchAgentsNum = 30;
 numOfRecord = 40;
 % population dimension
-dim = 30;
+dimValue = 30;
 % Maximum number of iterations, recommended maximum training is 300,000
 maxFes = 300000;
 % Fold is recommended to be set to 30
@@ -56,7 +56,7 @@ dateStr = datestr(now, 'yyyy-mm-dd');
 timeStr = datestr(now, 'HH_MM_SS');
 % Set output directory name and file name
 algNameStr = algorithmName{1};
-dirName = ['output/', dateStr, '/', algNameStr, '_', remarkStr, '/', dataSetName, '_', timeStr, '_D=', num2str(dim), '_T=', num2str(maxFes), '_F=', num2str(fold)];
+dirName = ['output/', dateStr, '/', algNameStr, '_', remarkStr, '/', dataSetName, '_', timeStr, '_D=', num2str(dimValue), '_T=', num2str(maxFes), '_F=', num2str(fold)];
 mkdir(dirName);
 fileName = [dirName, '/', algNameStr];
 % Excel header definition
@@ -77,15 +77,16 @@ markers = repmat(basicMarkers, ceil(nLines / numel(basicMarkers)), 1);
 
 for functionNum = 1:size(functionNameList, 2)
     functionName = functionNameList{functionNum};
-    [lb, ub, dim, fobj] = getFunctions(functionName, dim);
+    [lb, ub, dim, fobj] = getFunctions(functionName, dimValue);
     disp(['----------------', functionName, '----------------']);
     functionName = ['F', num2str(functionNum)];
     % Benchmark function
     resultCurves = zeros(algorithmNum, fold, numOfRecord);
 
-    parfor cfold = 1:fold
+    tic
 
-        tic
+    for cfold = 1:fold
+        % parfor cfold = 1:fold
 
         for cnum = 1:algorithmNum
             disp(['fold', num2str(cfold), '_', dataSetName, ':The ', algorithmName{cnum}, ' algorithm is trainning...']);
@@ -94,9 +95,9 @@ for functionNum = 1:size(functionNameList, 2)
             resultCurves(cnum, cfold, :) = uniformSampling(curve, numOfRecord);
         end
 
-        toc
-
     end
+
+    toc
 
     % Write data to excel sheet
     algorithmNamLabels = cell(algorithmNum * fold, 1);
@@ -181,8 +182,8 @@ for functionNum = 1:size(functionNameList, 2)
     axis tight
     %     grid on
     %     box on
-    saveas(gcf, [fileName, '-', functionName, '-carve'], 'fig')
-    fileName1 = [fileName, '-', functionName, '-carve'];
+    saveas(gcf, [fileName, '_', functionName, '_carve'], 'fig')
+    fileName1 = [fileName, '_', functionName, '_carve'];
     print(fileName1, '-dtiff', '-r300'); %<-Save as PNG with 300 DPI
 
 end
