@@ -12,14 +12,14 @@ numOfRecord = 40;
 % population dimension
 dimValue = 30;
 % Maximum number of iterations, recommended maximum training is 300,000
-maxFes = 300000;
+maxFes = 300;
 % Fold is recommended to be set to 30
 fold = 3;
 
 %% Algorithm Select
 % Select the algorithm to be trained
 % Please do not select more than 13 algorithms
-algorithmName = {'DEAHHO_version7', 'DEAHHO_version6', 'HHO', 'DE', 'ALCPSO', 'ABC'};
+algorithmName = {'DP_version5', 'DP_version4', 'DP_version3', 'BA', 'GA', 'PSO', 'WOA', 'SCA'};
 remarkStr = 'versionpk';
 
 %% Select training data set
@@ -190,10 +190,10 @@ for functionNum = 1:size(functionNameList, 2)
 
 end
 
-Orderhao(xlsFileName);
-pValueToExcelhao(xlsFileName, fold);
-FridTest3(xlsFileName, fold)
-% FridTest4(xlsFileName, fold)
+% Orderhao(xlsFileName);
+% pValueToExcelhao(xlsFileName, fold);
+% FridTest3(xlsFileName, fold);
+% FridTest4(xlsFileName, fold);
 disp([dataSetName, ':', algNameStr, ' training is over!'])
 
 close all
