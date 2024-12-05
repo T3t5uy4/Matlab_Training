@@ -1,4 +1,4 @@
-function [bestFitness, bestPosition, convergenceCurve] = DP_version2(searchAgentsNum, maxFes, lb, ub, dim, fobj)
+function [bestFitness, bestPosition, convergenceCurve] = DP_version3(searchAgentsNum, maxFes, lb, ub, dim, fobj)
     bestFitness = inf;
     bestPosition = zeros(1, dim);
     positions = initialization(searchAgentsNum, dim, ub, lb);
@@ -36,22 +36,21 @@ function [bestFitness, bestPosition, convergenceCurve] = DP_version2(searchAgent
             epsilon = max(epsilon, (fitness(i) - bestFitness) / 2);
         end
 
-        % Adjust the ratio of exploration and exploitation dynamically
-        [exploreRatio, exploitRatio] = dynamicPlanning(fe, maxFes);
-
-        % Adjust alpha, beta, and lr dynamically
-        [alpha, beta, lr] = dynamicPhaseAdjustment(fe, maxFes);
-
         for i = 1:size(positions, 1)
+            % Adjust the ratio of exploration and exploitation dynamically
+            [exploreRatio, exploitRatio] = dynamicPlanning(fe, maxFes);
+
+            % Adjust alpha, beta, and lr dynamically
+            [alpha, beta, lr] = dynamicPhaseAdjustment(fe, maxFes);
             r1 = abs(2 * rand - 1) * (1 - fe / maxFes);
             r2 = abs(2 * rand - 1);
 
             if r1 < exploreRatio
                 % Perform global search with random perturbations
                 if r2 < 0.5
-                    positions(i, :) = lr * positions(i, :) + alpha * (lb + (ub - lb) / 2 .* rand(1, dim)) + beta * bestPosition;
+                    newPosition = lr * positions(i, :) + alpha * ((2 * rand - 1) * (ub - lb) .* rand(1, dim)) + beta * bestPosition;
                 else
-                    positions(i, :) = lr * positions(i, :) + alpha * (lb + (ub - lb) / 2 .* rand(1, dim)) + beta * historyBestPositions(i, :);
+                    newPosition = lr * positions(i, :) + alpha * ((2 * rand - 1) * (ub - lb) .* rand(1, dim)) + beta * historyBestPositions(i, :);
                 end
 
             elseif r1 < exploreRatio + exploitRatio
@@ -69,9 +68,9 @@ function [bestFitness, bestPosition, convergenceCurve] = DP_version2(searchAgent
                 randPosition2 = positions(randIdx(2), :);
 
                 if r2 < 0.5
-                    positions(i, :) = positions(i, :) + lr * (bestPosition - positions(i, :)) + alpha * (lb + (ub - lb) / 2 .* rand(1, dim)) + beta * (randPosition1 - randPosition2);
+                    newPosition = positions(i, :) + lr * (bestPosition - positions(i, :)) + alpha * ((2 * rand - 1) * (ub - lb) .* rand(1, dim)) + beta * (randPosition1 - randPosition2);
                 else
-                    positions(i, :) = positions(i, :) + lr * (historyBestPositions(i, :) - positions(i, :)) + alpha * (lb + (ub - lb) / 2 .* rand(1, dim)) + beta * (randPosition1 - randPosition2);
+                    newPosition = positions(i, :) + lr * (historyBestPositions(i, :) - positions(i, :)) + alpha * ((2 * rand - 1) * (ub - lb) .* rand(1, dim)) + beta * (randPosition1 - randPosition2);
                 end
 
             else
@@ -82,47 +81,43 @@ function [bestFitness, bestPosition, convergenceCurve] = DP_version2(searchAgent
                 randPosition2 = positions(randIdx(2), :);
 
                 if r2 < 0.5
-                    positions(i, :) = lr * positions(i, :) + alpha * (randPosition1 - randPosition2) + beta * bestPosition + r3 * mean(positions);
+                    newPosition = lr * positions(i, :) + alpha * (randPosition1 - randPosition2) + beta * bestPosition + r3 * mean(positions);
                 else
-                    positions(i, :) = lr * positions(i, :) + alpha * (randPosition1 - randPosition2) + beta * historyBestPositions(i, :) + r3 * mean(positions);
+                    newPosition = lr * positions(i, :) + alpha * (randPosition1 - randPosition2) + beta * historyBestPositions(i, :) + r3 * mean(positions);
                 end
 
             end
 
-            fitness(i) = fobj(positions(i, :));
+            newFitness = fobj(newPosition);
             fe = fe + 1;
 
-            if fitness(i) < bestFitness
-                bestFitness = fitness(i);
-                bestPosition = positions(i, :);
-            end
+            if newFitness < fitness(i)
+                fitness(i) = newFitness;
+                positions(i, :) = newPosition;
 
-            if fitness(i) < historyBestFitness(i)
-                historyBestFitness(i) = fitness(i);
-                historyBestPositions(i, :) = positions(i, :);
+                if fitness(i) < bestFitness
+                    bestFitness = fitness(i);
+                    bestPosition = positions(i, :);
+                end
+
+                if fitness(i) < historyBestFitness(i)
+                    historyBestFitness(i) = fitness(i);
+                    historyBestPositions(i, :) = positions(i, :);
+                end
+
             end
 
             % % The memory mechanism: When the current solution is far from the historical best solution, allow larger jumps in the search space.
 
             distanceToBest = norm(positions(i, :) - bestPosition);
-            newPosition = zeros(1, dim);
 
             if distanceToBest > epsilon % Assume a distance threshold.
-                r4 = abs(2 * rand - 1);
-                newPosition = positions(i, :) + r4 .* Levy(dim);
+                r4 = (exp(t / maxFes) + exp(-t / maxFes)) / 2;
             else
-                newPosition = positions(i, :) + sqrt(2) .* randn(1, dim);
+                r4 = (exp(t / maxFes) - exp(-t / maxFes)) / 2;
             end
 
-            j_rand = randi(dim); % Random index for crossover
-
-            for j = 1:dim
-
-                if rand < 0.5 || j == j_rand
-                    positions(i, j) = newPosition(j);
-                end
-
-            end
+            positions(i, :) = positions(i, :) + r4 .* Levy(dim);
 
         end
 

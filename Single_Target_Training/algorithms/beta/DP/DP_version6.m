@@ -1,4 +1,4 @@
-function [bestFitness, bestPosition, convergenceCurve] = DP_version4(searchAgentsNum, maxFes, lb, ub, dim, fobj)
+function [bestFitness, bestPosition, convergenceCurve] = DP_version6(searchAgentsNum, maxFes, lb, ub, dim, fobj)
     bestFitness = inf;
     bestPosition = zeros(1, dim);
     positions = initialization(searchAgentsNum, dim, ub, lb);
@@ -8,6 +8,7 @@ function [bestFitness, bestPosition, convergenceCurve] = DP_version4(searchAgent
     historyBestPositions = positions;
     t = 0;
     fe = 0;
+    worstFitness = -inf;
 
     while fe < maxFes
 
@@ -16,6 +17,7 @@ function [bestFitness, bestPosition, convergenceCurve] = DP_version4(searchAgent
             FL = positions(i, :) < lb;
             positions(i, :) = (positions(i, :) .* (~(FU + FL))) + ub .* FU + lb .* FL;
             fitness(i) = fobj(positions(i, :));
+            worstFitness = max(worstFitness, fitness(i));
             fe = fe + 1;
 
             if fitness(i) < bestFitness
@@ -33,33 +35,33 @@ function [bestFitness, bestPosition, convergenceCurve] = DP_version4(searchAgent
         epsilon = -inf;
 
         for i = 1:size(positions, 1)
-            epsilon = max(epsilon, (fitness(i) - bestFitness) / 2);
+            epsilon = max(epsilon, (fitness(i) - bestFitness) * (1 - fe / maxFes));
         end
 
         for i = 1:size(positions, 1)
             % Adjust the ratio of exploration and exploitation dynamically
-            [exploreRatio, exploitRatio] = dynamicPlanning(fe, maxFes);
+            [exploreRatio, exploitRatio] = dynamicPlanning(fe, maxFes, fitness(i), bestFitness, worstFitness);
 
             % Adjust alpha, beta, and lr dynamically
             [alpha, beta, lr] = dynamicPhaseAdjustment(fe, maxFes);
             r1 = abs(2 * rand - 1) * (1 - fe / maxFes);
             r2 = abs(2 * rand - 1);
 
-            if r1 < exploreRatio
+            if r1 <= exploreRatio
                 % Perform global search with random perturbations
-                if r2 < 0.5
+                if r2 <= 0.5
                     newPosition = lr * positions(i, :) + alpha * ((2 * rand - 1) * (ub - lb) .* rand(1, dim)) + beta * (2 * rand - 1) * bestPosition;
                 else
                     newPosition = lr * positions(i, :) + alpha * ((2 * rand - 1) * (ub - lb) .* rand(1, dim)) + beta * (2 * rand - 1) * historyBestPositions(i, :);
                 end
 
-            elseif r1 < exploreRatio + exploitRatio
+            elseif r1 <= exploitRatio
                 % Perform local search with some global perturbation
                 randIdx = getRandIndex(i, searchAgentsNum, 2);
                 randPosition1 = positions(randIdx(1), :);
                 randPosition2 = positions(randIdx(2), :);
 
-                if r2 < 0.5
+                if r2 <= 0.5
                     newPosition = positions(i, :) + lr * (bestPosition - positions(i, :)) + alpha * ((2 * rand - 1) * (ub - lb) .* rand(1, dim)) + beta * (randPosition1 - randPosition2);
                 else
                     newPosition = positions(i, :) + lr * (historyBestPositions(i, :) - positions(i, :)) + alpha * ((2 * rand - 1) * (ub - lb) .* rand(1, dim)) + beta * (randPosition1 - randPosition2);
@@ -104,12 +106,12 @@ function [bestFitness, bestPosition, convergenceCurve] = DP_version4(searchAgent
             distanceToBest = norm(positions(i, :) - bestPosition);
 
             if distanceToBest > epsilon % Assume a distance threshold.
-                r4 = (exp(1 + (t / maxFes)) + exp(1 - (t / maxFes))) / 2;
+                r4 = (exp(1 + (fe / maxFes)) + exp(1 - (fe / maxFes))) / 2;
             else
-                r4 = (exp(1 + (t / maxFes)) - exp(1 - (t / maxFes))) / 2;
+                r4 = (exp(1 + (fe / maxFes)) - exp(1 - (fe / maxFes))) / 2;
             end
 
-            positions(i, :) = positions(i, :) + cos(r4) .* Levy(dim);
+            positions(i, :) = positions(i, :) + (1 - fe / maxFes) * cos(r4) .* Levy(dim);
 
         end
 
@@ -119,15 +121,13 @@ function [bestFitness, bestPosition, convergenceCurve] = DP_version4(searchAgent
 
 end
 
-function [exploreRatio, exploitRatio] = dynamicPlanning(fe, maxFes)
+function [exploreRatio, exploitRatio] = dynamicPlanning(fe, maxFes, thisFitness, bestFitness, worstFitness)
     progress = fe / maxFes;
 
-    if progress <= 1/3
-        exploreRatio = 0.7; exploitRatio = 0.2;
-    elseif progress <= 2/3
-        exploreRatio = 0.3; exploitRatio = 0.4;
+    if progress <= ((thisFitness - bestFitness + 1) / (worstFitness - bestFitness + 1))
+        exploreRatio = 0.5; exploitRatio = 0.7;
     else
-        exploreRatio = 0.1; exploitRatio = 0.2;
+        exploreRatio = 0.3; exploitRatio = 0.5;
     end
 
 end

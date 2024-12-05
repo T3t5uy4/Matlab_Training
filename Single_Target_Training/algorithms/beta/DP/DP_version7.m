@@ -37,6 +37,37 @@ function [bestFitness, bestPosition, convergenceCurve] = DP_version4(searchAgent
         end
 
         for i = 1:size(positions, 1)
+            delta = fitness(i) - bestFitness;
+            dp = zeros(1, dim);
+
+            if delta <= 0.2 * (1 - (fe / maxFes)) * epsilon
+
+                for j = 1:dim
+
+                    if bestPosition(1, j) <= positions(i, j)
+                        dp(1, j) = 1;
+                    else
+                        dp(1, j) = -1;
+                    end
+
+                end
+
+            elseif delta <= 0.7 * (1 - (fe / maxFes)) * epsilon
+                dp = 2 * randi([0, 1], 1, dim) - 1;
+            else
+
+                for j = 1:dim
+
+                    if bestPosition(1, j) <= positions(i, j)
+                        dp(1, j) = -1;
+                    else
+                        dp(1, j) = 1;
+                    end
+
+                end
+
+            end
+
             % Adjust the ratio of exploration and exploitation dynamically
             [exploreRatio, exploitRatio] = dynamicPlanning(fe, maxFes);
 
@@ -48,9 +79,9 @@ function [bestFitness, bestPosition, convergenceCurve] = DP_version4(searchAgent
             if r1 < exploreRatio
                 % Perform global search with random perturbations
                 if r2 < 0.5
-                    newPosition = lr * positions(i, :) + alpha * ((2 * rand - 1) * (ub - lb) .* rand(1, dim)) + beta * (2 * rand - 1) * bestPosition;
+                    newPosition = lr * positions(i, :) + abs(alpha * ((2 * rand - 1) * (ub - lb) .* rand(1, dim)) + beta * (2 * rand - 1) * bestPosition) .* dp;
                 else
-                    newPosition = lr * positions(i, :) + alpha * ((2 * rand - 1) * (ub - lb) .* rand(1, dim)) + beta * (2 * rand - 1) * historyBestPositions(i, :);
+                    newPosition = lr * positions(i, :) + abs(alpha * ((2 * rand - 1) * (ub - lb) .* rand(1, dim)) + beta * (2 * rand - 1) * historyBestPositions(i, :)) .* dp;
                 end
 
             elseif r1 < exploreRatio + exploitRatio
@@ -60,9 +91,9 @@ function [bestFitness, bestPosition, convergenceCurve] = DP_version4(searchAgent
                 randPosition2 = positions(randIdx(2), :);
 
                 if r2 < 0.5
-                    newPosition = positions(i, :) + lr * (bestPosition - positions(i, :)) + alpha * ((2 * rand - 1) * (ub - lb) .* rand(1, dim)) + beta * (randPosition1 - randPosition2);
+                    newPosition = positions(i, :) + abs(lr * (bestPosition - positions(i, :)) + alpha * ((2 * rand - 1) * (ub - lb) .* rand(1, dim)) + beta * (randPosition1 - randPosition2)) .* dp;
                 else
-                    newPosition = positions(i, :) + lr * (historyBestPositions(i, :) - positions(i, :)) + alpha * ((2 * rand - 1) * (ub - lb) .* rand(1, dim)) + beta * (randPosition1 - randPosition2);
+                    newPosition = positions(i, :) + abs(lr * (historyBestPositions(i, :) - positions(i, :)) + alpha * ((2 * rand - 1) * (ub - lb) .* rand(1, dim)) + beta * (randPosition1 - randPosition2)) .* dp;
                 end
 
             else
@@ -73,9 +104,9 @@ function [bestFitness, bestPosition, convergenceCurve] = DP_version4(searchAgent
                 randPosition2 = positions(randIdx(2), :);
 
                 if r2 < 0.5
-                    newPosition = lr * positions(i, :) + alpha * (randPosition1 - randPosition2) + beta * (2 * rand - 1) * bestPosition + r3 * mean(positions);
+                    newPosition = lr * positions(i, :) + abs(alpha * (randPosition1 - randPosition2) + beta * (2 * rand - 1) * bestPosition + r3 * mean(positions)) .* dp .* Levy(dim);
                 else
-                    newPosition = lr * positions(i, :) + alpha * (randPosition1 - randPosition2) + beta * (2 * rand - 1) * historyBestPositions(i, :) + r3 * mean(positions);
+                    newPosition = lr * positions(i, :) + abs(alpha * (randPosition1 - randPosition2) + beta * (2 * rand - 1) * historyBestPositions(i, :) + r3 * mean(positions)) .* dp .*Levy(dim);
                 end
 
             end
@@ -142,7 +173,7 @@ function [lr, alpha, beta] = dynamicPhaseAdjustment(fe, maxFes)
     if progress <= 1/3
         lr = 0.5;
         alpha = 0.6;
-        beta = 0.9;
+        beta = 0.8;
     elseif progress <= 2/3
         lr = 0.3;
         alpha = 0.4;

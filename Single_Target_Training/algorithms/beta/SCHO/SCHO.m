@@ -44,14 +44,14 @@ function [bestFitness, bestPosition, convergenceCurve] = SCHO(N, maxFes, lb, ub,
 
             for j = 1:size(X, 2) % in j-th dimension
                 %update A by using Eq. (17)
-                cosh2 = (exp(t / maxFes) + exp(-t / maxFes)) / 2;
-                sinh2 = (exp(t / maxFes) - exp(-t / maxFes)) / 2;
+                cosh2 = (exp(fe / maxFes) + exp(-fe / maxFes)) / 2;
+                sinh2 = (exp(fe / maxFes) - exp(-fe / maxFes)) / 2;
                 r1 = rand();
-                A = (p - q * (t / maxFes) ^ (cosh2 / (sinh2))) * r1;
+                A = (p - q * (fe / maxFes) ^ (cosh2 / (sinh2))) * r1;
                 % enter the bounded search strategy
                 if t == BSi
-                    ub_2 = bestPosition(j) + (1 - t / maxFes) * abs(bestPosition(j) - bestPosition_second(j));
-                    lb_2 = bestPosition(j) - (1 - t / maxFes) * abs(bestPosition(j) - bestPosition_second(j));
+                    ub_2 = bestPosition(j) + (1 - fe / maxFes) * abs(bestPosition(j) - bestPosition_second(j));
+                    lb_2 = bestPosition(j) - (1 - fe / maxFes) * abs(bestPosition(j) - bestPosition_second(j));
 
                     if ub_2 > ub
                         ub_2 = ub;
@@ -70,7 +70,7 @@ function [bestFitness, bestPosition, convergenceCurve] = SCHO(N, maxFes, lb, ub,
                 if t <= T %3.6-3.62
                     r2 = rand();
                     r3 = rand();
-                    a1 = 3 * (-1.3 * t / maxFes + m);
+                    a1 = 3 * (-1.3 * fe / maxFes + m);
                     r4 = rand();
                     r5 = rand();
 
@@ -102,7 +102,7 @@ function [bestFitness, bestPosition, convergenceCurve] = SCHO(N, maxFes, lb, ub,
                     % the second phase of exploration and exploitation
                     r2 = rand();
                     r3 = rand();
-                    a2 = 2 * (-t / maxFes + n);
+                    a2 = 2 * (-fe / maxFes + n);
                     W2 = r2 * a2;
                     r4 = rand();
                     r5 = rand();
