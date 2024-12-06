@@ -1,4 +1,4 @@
-function [bestFitness, bestPosition, convergenceCurve] = DP_version7(searchAgentsNum, maxFes, lb, ub, dim, fobj)
+function [bestFitness, bestPosition, convergenceCurve] = DP(searchAgentsNum, maxFes, lb, ub, dim, fobj)
     bestFitness = inf;
     bestPosition = zeros(1, dim);
     positions = initialization(searchAgentsNum, dim, ub, lb);
@@ -101,15 +101,7 @@ function [bestFitness, bestPosition, convergenceCurve] = DP_version7(searchAgent
 end
 
 function [k] = getRandIndex(i, n, count)
-    k = zeros(1, count);
 
-    for i = 1:count
-        k(i) = randi([1, n]);
-
-        while k(i) == i
-            k(i) = randi([1, n]);
-        end
-
-    end
-
+    candidates = setdiff(1:n, i);
+    k = datasample(candidates, count, 'Replace', false);
 end
