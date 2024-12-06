@@ -1,200 +1,232 @@
 % last modify by luojie in 20171018
-function [lb,Positionbest,Convergence_curve] = GA(SearchAgents_no,MaxFEs,lb,ub,dim,fobj)
-%% ²ÎÊý³õÊ¼»¯
+function [lb, Positionbest, Convergence_curve] = GA(SearchAgents_no, MaxFEs, lb, ub, dim, fobj)
+    %% ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½
 
-ga_option = struct('maxgen',MaxFEs,'sizepop',SearchAgents_no,'pCrossover',0.3,'pMutation',0.1, ...
-            'cbound',[lb,ub],'gbound',[lb,ub],'v',3);
+    ga_option = struct('maxgen', MaxFEs, 'sizepop', SearchAgents_no, 'pCrossover', 0.3, 'pMutation', 0.1, ...
+        'cbound', [lb, ub], 'gbound', [lb, ub], 'v', 3);
 
-FEs=0;
-c_len_chromosome = ceil(log2((ga_option.cbound(2)-ga_option.cbound(1))*100));
-g_len_chromosome = ceil(log2((ga_option.gbound(2)-ga_option.gbound(1))*100));
-len_chromosome = c_len_chromosome+g_len_chromosome;
+    FEs = 0;
+    c_len_chromosome = ceil(log2((ga_option.cbound(2) - ga_option.cbound(1)) * 100));
+    g_len_chromosome = ceil(log2((ga_option.gbound(2) - ga_option.gbound(1)) * 100));
+    len_chromosome = c_len_chromosome + g_len_chromosome;
 
-% ½«ÖÖÈºÐÅÏ¢¶¨ÒåÎªÒ»¸ö½á¹¹Ìå
-individuals=struct('fitness',zeros(1,ga_option.sizepop), ...
-                   'chromosome',zeros(ga_option.sizepop,len_chromosome));  
-% Ã¿Ò»´úÖÖÈºµÄÆ½¾ùÊÊÓ¦¶È
-avgfitness_gen = zeros(1,ga_option.maxgen);         
-% Ã¿Ò»´úÖÖÈºµÄ×î¼ÑÊÊÓ¦¶È
-bestfitness_gen = [];                    
-Convergence_curve=[];
+    % ï¿½ï¿½ï¿½ï¿½Èºï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½ÎªÒ»ï¿½ï¿½ï¿½á¹¹ï¿½ï¿½
+    individuals = struct('fitness', zeros(1, ga_option.sizepop), ...
+        'chromosome', zeros(ga_option.sizepop, len_chromosome));
+    % Ã¿Ò»ï¿½ï¿½ï¿½ï¿½Èºï¿½ï¿½Æ½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½
+    avgfitness_gen = zeros(1, ga_option.maxgen);
+    % Ã¿Ò»ï¿½ï¿½ï¿½ï¿½Èºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½
+    bestfitness_gen = [];
+    Convergence_curve = [];
 
-%% ³õÊ¼»¯ÖÖÈº
-    fobjvalue=zeros(1,ga_option.sizepop);
-for i = 1:ga_option.sizepop
-    % ±àÂë
-    individuals.chromosome(i,:) = unidrnd(2,1,len_chromosome)-1;
-    % ½âÂë
-    [c,g] = ga_decode(individuals.chromosome(i,:),ga_option.cbound,ga_option.gbound);
-    % ¼ÆËã³õÊ¼ÊÊÓ¦¶È(CV×¼È·ÂÊ)
-    fobjvalue(i) = fobj([c,g]);
-    FEs=FEs+1;
+    %% ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½Èº
+    fobjvalue = zeros(1, ga_option.sizepop);
+
+    for i = 1:ga_option.sizepop
+        % ï¿½ï¿½ï¿½ï¿½
+        individuals.chromosome(i, :) = unidrnd(2, 1, len_chromosome) - 1;
+        % ï¿½ï¿½ï¿½ï¿½
+        [c, g] = ga_decode(individuals.chromosome(i, :), ga_option.cbound, ga_option.gbound);
+        % ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½Ó¦ï¿½ï¿½(CV×¼È·ï¿½ï¿½)
+        fobjvalue(i) = fobj([c, g]);
+        FEs = FEs + 1;
+    end
+
+    globleMax = max(fobjvalue);
+    globleMin = min(fobjvalue);
+    individuals.fitness = getFitness(fobjvalue, globleMax, globleMin); %ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä´ï¿½ï¿½ï¿½ï¿½ï¿½p
+    % ï¿½ï¿½ï¿½ï¿½Ñµï¿½ï¿½ï¿½Ó¦ï¿½Èºï¿½ï¿½ï¿½Ãµï¿½È¾É«ï¿½ï¿½ï¿½Î»ï¿½ï¿½
+    [bestfitness, bestindex] = max(individuals.fitness);
+    % ï¿½ï¿½Ãµï¿½È¾É«ï¿½ï¿½
+    bestchromosome = individuals.chromosome(bestindex, :);
+    t = 1;
+    %% ï¿½ï¿½ï¿½ï¿½Ñ°ï¿½ï¿½
+    while FEs < ga_option.maxgen %i=1:ga_option.maxgen
+        % Selection Operator
+        individuals = Selection(individuals, ga_option);
+        % Crossover Operator
+        individuals = Crossover(individuals, ga_option);
+        % Mutation Operator
+        individuals = Mutation(individuals, ga_option);
+
+        % ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½
+        fobjvalue = zeros(1, ga_option.sizepop);
+
+        for j = 1:ga_option.sizepop
+            % ï¿½ï¿½ï¿½ï¿½
+            [c, g] = ga_decode(individuals.chromosome(j, :), ga_option.cbound, ga_option.gbound);
+            fobjvalue(j) = fobj([c, g]);
+            FEs = FEs + 1;
+        end
+
+        localMax = max(fobjvalue);
+        localMin = min(fobjvalue);
+
+        if localMax > globleMax,
+            globleMax = localMax;
+        end
+
+        if localMin < globleMin,
+            globleMin = localMin;
+        end
+
+        individuals.fitness = getFitness(fobjvalue, globleMax, globleMin); %ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä´ï¿½ï¿½ï¿½ï¿½ï¿½p
+        % ï¿½ï¿½ï¿½ï¿½Ñµï¿½ï¿½ï¿½Ó¦ï¿½Èºï¿½ï¿½ï¿½Ãµï¿½È¾É«ï¿½ï¿½ï¿½Î»ï¿½ï¿½
+        [new_bestfitness, bestindex] = max(individuals.fitness);
+        % ï¿½ï¿½Ãµï¿½È¾É«ï¿½ï¿½
+        new_bestchromosome = individuals.chromosome(bestindex, :);
+
+        if new_bestfitness >= bestfitness
+            bestfitness = new_bestfitness;
+            bestchromosome = new_bestchromosome;
+        end
+
+        % ï¿½ï¿½Ò»ï¿½ï¿½È¾É«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½
+        bestfitness_gen(t) = bestfitness;
+        % ï¿½ï¿½Ò»ï¿½ï¿½È¾É«ï¿½ï¿½ï¿½Æ½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½
+        avgfitness_gen(t) = sum(individuals.fitness) / ga_option.sizepop;
+        %for output
+        Positionbest = ga_decode(bestchromosome, ga_option.cbound, ga_option.gbound);
+        bestValue = fobj(Positionbest);
+        FEs = FEs + 1;
+
+        if t > 1 && bestValue > Convergence_curve(t - 1)
+            Convergence_curve(t) = Convergence_curve(t - 1);
+        else
+            Convergence_curve(t) = bestValue;
+        end
+
+        t = t + 1;
+    end
+
 end
-    globleMax=max(fobjvalue);
-    globleMin=min(fobjvalue);
-    individuals.fitness=getFitness(fobjvalue,globleMax,globleMin);%¸÷¸öÌåµÄ´æ»î¸ÅÂÊp 
-% ÕÒ×î¼ÑµÄÊÊÓ¦¶ÈºÍ×îºÃµÄÈ¾É«ÌåµÄÎ»ÖÃ
-[bestfitness,bestindex]=max(individuals.fitness);
-% ×îºÃµÄÈ¾É«Ìå
-bestchromosome = individuals.chromosome(bestindex,:); 
-t=1;
-%% µü´úÑ°ÓÅ
-while FEs<ga_option.maxgen%i=1:ga_option.maxgen
-    % Selection Operator
-    individuals = Selection(individuals,ga_option);
-    % Crossover Operator
-    individuals = Crossover(individuals,ga_option);
-    % Mutation Operator
-    individuals = Mutation(individuals,ga_option);
-    
-    % ¼ÆËãÊÊÓ¦¶È
-    fobjvalue=zeros(1,ga_option.sizepop);
-    for j = 1:ga_option.sizepop
-        % ½âÂë
-        [c,g] = ga_decode(individuals.chromosome(j,:),ga_option.cbound,ga_option.gbound);
-        fobjvalue(j)= fobj([c,g]);
-         FEs=FEs+1;
-    end
-    localMax=max(fobjvalue);
-    localMin=min(fobjvalue);
-    if localMax>globleMax,
-        globleMax=localMax;
-    end
-    if localMin<globleMin,
-        globleMin=localMin;
-    end
-     individuals.fitness=getFitness(fobjvalue,globleMax,globleMin);%¸÷¸öÌåµÄ´æ»î¸ÅÂÊp 
-    % ÕÒ×î¼ÑµÄÊÊÓ¦¶ÈºÍ×îºÃµÄÈ¾É«ÌåµÄÎ»ÖÃ
-    [new_bestfitness,bestindex]=max(individuals.fitness);
-    % ×îºÃµÄÈ¾É«Ìå
-    new_bestchromosome = individuals.chromosome(bestindex,:);
 
-    if new_bestfitness >=bestfitness
-        bestfitness = new_bestfitness;
-        bestchromosome = new_bestchromosome;
-    end
-    
-    % ÕâÒ»´úÈ¾É«ÌåµÄ×î¼ÑÊÊÓ¦¶È
-    bestfitness_gen(t) = bestfitness;
-    % ÕâÒ»´úÈ¾É«ÌåµÄÆ½¾ùÊÊÓ¦¶È
-    avgfitness_gen(t) = sum(individuals.fitness)/ga_option.sizepop;
-    %for output
-    Positionbest=ga_decode(bestchromosome,ga_option.cbound,ga_option.gbound);
-    bestValue=fobj(Positionbest);
-     FEs=FEs+1;
-    if t>1&&bestValue>Convergence_curve(t-1)
-        Convergence_curve(t)=Convergence_curve(t-1);
-    else
-        Convergence_curve(t)=bestValue;
-    end
-    t=t+1;
-end
-end
 %% sub function ga_decode
-function [c,g] = ga_decode(chromosome,cbound,gbound)
-% ga_decode by faruto 
-% Email:farutoliyang@gmail.com
-% 2009.10.08
-c_len_chromosome = ceil(log2((cbound(2)-cbound(1))*100));
-g_len_chromosome = ceil(log2((gbound(2)-gbound(1))*100));
-len_chromosome = c_len_chromosome+g_len_chromosome;
+function [c, g] = ga_decode(chromosome, cbound, gbound)
+    % ga_decode by faruto
+    % Email:farutoliyang@gmail.com
+    % 2009.10.08
+    c_len_chromosome = ceil(log2((cbound(2) - cbound(1)) * 100));
+    g_len_chromosome = ceil(log2((gbound(2) - gbound(1)) * 100));
+    len_chromosome = c_len_chromosome + g_len_chromosome;
 
-cdec = bin2dec( num2str(chromosome(1:c_len_chromosome)) );
-gdec = bin2dec( num2str(chromosome(c_len_chromosome+1:len_chromosome)) );
+    cdec = bin2dec(num2str(chromosome(1:c_len_chromosome)));
+    gdec = bin2dec(num2str(chromosome(c_len_chromosome + 1:len_chromosome)));
 
-c = cbound(1) + cdec*(cbound(2)-cbound(1))/(2^(c_len_chromosome)-1);
-g = gbound(1) + gdec*(gbound(2)-gbound(1))/(2^(g_len_chromosome)-1);
+    c = cbound(1) + cdec * (cbound(2) - cbound(1)) / (2 ^ (c_len_chromosome) - 1);
+    g = gbound(1) + gdec * (gbound(2) - gbound(1)) / (2 ^ (g_len_chromosome) - 1);
 end
+
 %% sub function Selection
-function individuals_afterSelect = Selection(individuals,ga_option)
-% Selection by faruto 
-% Email:farutoliyang@gmail.com
-% 2009.10.08
-individuals_afterSelect = individuals;
-sum_fitness = sum(individuals.fitness);
-P = individuals.fitness / sum_fitness;
-Q = zeros(1,ga_option.sizepop);
-for k = 1:ga_option.sizepop
-    Q(k) = sum(P(1:k));
-end
-for i = 1:ga_option.sizepop
-    r = rand;
-    while r == 0
+function individuals_afterSelect = Selection(individuals, ga_option)
+    % Selection by faruto
+    % Email:farutoliyang@gmail.com
+    % 2009.10.08
+    individuals_afterSelect = individuals;
+    sum_fitness = sum(individuals.fitness);
+    P = individuals.fitness / sum_fitness;
+    Q = zeros(1, ga_option.sizepop);
+
+    for k = 1:ga_option.sizepop
+        Q(k) = sum(P(1:k));
+    end
+
+    for i = 1:ga_option.sizepop
         r = rand;
+
+        while r == 0
+            r = rand;
+        end
+
+        k = 1;
+
+        while k <= ga_option.sizepop - 1 && r > Q(k)
+            k = k + 1;
+        end
+
+        %     individuals_afterSelect.fitness(i) = individuals.fitness(k);
+        individuals_afterSelect.chromosome(i, :) = individuals.chromosome(k, :);
     end
-    k = 1;
-    while k <= ga_option.sizepop-1 && r > Q(k) 
-        k = k+1; 
-    end
-%     individuals_afterSelect.fitness(i) = individuals.fitness(k);
-    individuals_afterSelect.chromosome(i,:) = individuals.chromosome(k,:);
+
 end
-end
+
 %% sub function Crossover
-function individuals_afterCross = Crossover(individuals,ga_option)
-% Crossover by faruto 
-% Email:farutoliyang@gmail.com
-% 2009.10.08
-individuals_afterCross = individuals;
-c_len_chromosome = ceil(log2((ga_option.cbound(2)-ga_option.cbound(1))*100));
-g_len_chromosome = ceil(log2((ga_option.gbound(2)-ga_option.gbound(1))*100));
-len_chromosome = c_len_chromosome+g_len_chromosome;
+function individuals_afterCross = Crossover(individuals, ga_option)
+    % Crossover by faruto
+    % Email:farutoliyang@gmail.com
+    % 2009.10.08
+    individuals_afterCross = individuals;
+    c_len_chromosome = ceil(log2((ga_option.cbound(2) - ga_option.cbound(1)) * 100));
+    g_len_chromosome = ceil(log2((ga_option.gbound(2) - ga_option.gbound(1)) * 100));
+    len_chromosome = c_len_chromosome + g_len_chromosome;
 
-for i = 1:ga_option.sizepop
-    % ½»²æ¸ÅÂÊ¾ö¶¨ÊÇ·ñ½øÐÐ½»²æ
-    r = rand;
-    if r > ga_option.pCrossover
-        continue;
+    for i = 1:ga_option.sizepop
+        % ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½Ð½ï¿½ï¿½ï¿½
+        r = rand;
+
+        if r > ga_option.pCrossover
+            continue;
+        end
+
+        % ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¾É«ï¿½ï¿½ï¿½ï¿½Ð½ï¿½ï¿½ï¿½
+        pick = rand(1, 2);
+
+        while prod(pick) == 0
+            pick = rand(1, 2);
+        end
+
+        index = ceil(pick .* ga_option.sizepop);
+
+        % ï¿½ï¿½ï¿½Ñ¡ï¿½ñ½»²ï¿½Î»ï¿½ï¿½
+        pos_cross = unidrnd(len_chromosome - 1);
+        % ï¿½ï¿½ï¿½Ð½ï¿½ï¿½ï¿½
+        individuals_afterCross.chromosome(index(1), pos_cross + 1:len_chromosome) ...
+            = individuals.chromosome(index(2), pos_cross + 1:len_chromosome);
+        individuals_afterCross.chromosome(index(2), pos_cross + 1:len_chromosome) ...
+            = individuals.chromosome(index(1), pos_cross + 1:len_chromosome);
     end
-    % Ëæ»úÑ¡ÔñÁ½¸öÈ¾É«Ìå½øÐÐ½»²æ
-    pick=rand(1,2);
-    while prod(pick)==0
-        pick=rand(1,2);
-    end
-    index=ceil(pick.*ga_option.sizepop);
-    
-    % Ëæ»úÑ¡Ôñ½»²æÎ»ÖÃ
-    pos_cross = unidrnd(len_chromosome-1);
-    % ½øÐÐ½»²æ
-    individuals_afterCross.chromosome(index(1),pos_cross+1:len_chromosome) ...
-        = individuals.chromosome(index(2),pos_cross+1:len_chromosome);
-    individuals_afterCross.chromosome(index(2),pos_cross+1:len_chromosome) ...
-        = individuals.chromosome(index(1),pos_cross+1:len_chromosome);
+
 end
-end
+
 %% sub function Mutation
-function individuals_afterMutate = Mutation(individuals,ga_option)
-% Mutation by faruto 
-% Email:farutoliyang@gmail.com
-% 2009.10.08
-individuals_afterMutate = individuals;
-c_len_chromosome = ceil(log2((ga_option.cbound(2)-ga_option.cbound(1))*100));
-g_len_chromosome = ceil(log2((ga_option.gbound(2)-ga_option.gbound(1))*100));
-len_chromosome = c_len_chromosome+g_len_chromosome;
+function individuals_afterMutate = Mutation(individuals, ga_option)
+    % Mutation by faruto
+    % Email:farutoliyang@gmail.com
+    % 2009.10.08
+    individuals_afterMutate = individuals;
+    c_len_chromosome = ceil(log2((ga_option.cbound(2) - ga_option.cbound(1)) * 100));
+    g_len_chromosome = ceil(log2((ga_option.gbound(2) - ga_option.gbound(1)) * 100));
+    len_chromosome = c_len_chromosome + g_len_chromosome;
 
-for i = 1:ga_option.sizepop
-    % ±äÒì¸ÅÂÊ¾ö¶¨ÊÇ·ñ½øÐÐ½»²æ
-    r = rand;
-    if r > ga_option.pMutation
-        continue;
+    for i = 1:ga_option.sizepop
+        % ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½Ð½ï¿½ï¿½ï¿½
+        r = rand;
+
+        if r > ga_option.pMutation
+            continue;
+        end
+
+        % ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½Ò»ï¿½ï¿½È¾É«ï¿½ï¿½ï¿½ï¿½Ð±ï¿½ï¿½ï¿½
+        pick = unidrnd(ga_option.sizepop);
+        % ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
+        pos_mutate = unidrnd(len_chromosome);
+        % ï¿½ï¿½ï¿½Ð±ï¿½ï¿½ï¿½
+        if individuals_afterMutate.chromosome(pick, pos_mutate) == 0
+            individuals_afterMutate.chromosome(pick, pos_mutate) = 1;
+        else
+            individuals_afterMutate.chromosome(pick, pos_mutate) = 0;
+        end
+
     end
-    % Ëæ»úÑ¡ÔñÒ»¸öÈ¾É«Ìå½øÐÐ±äÒì
-    pick = unidrnd(ga_option.sizepop);
-    % Ëæ»úÑ¡Ôñ±äÒìÎ»ÖÃ
-    pos_mutate = unidrnd(len_chromosome);
-    % ½øÐÐ±äÒì
-    if individuals_afterMutate.chromosome(pick,pos_mutate) == 0
-       individuals_afterMutate.chromosome(pick,pos_mutate) = 1;
-    else
-       individuals_afterMutate.chromosome(pick,pos_mutate) = 0;
-    end
+
 end
-end
-function fitness=getFitness(objValues,globleMax,globleMin)
-    if globleMax==globleMin
-        fitness=0.5*ones(1,size(objValues,2));
+
+function fitness = getFitness(objValues, globleMax, globleMin)
+
+    if globleMax == globleMin
+        fitness = 0.5 * ones(1, size(objValues, 2));
     else
-        fitness=1-0.9*(objValues-globleMin)/(globleMax-globleMin);
+        fitness = 1 - 0.9 * (objValues - globleMin) / (globleMax - globleMin);
     end
-    
+
 end

@@ -122,7 +122,7 @@ function [bestFitness, bestPosition, convergenceCurve] = DEAHHO(searchAgentsNum,
                 mutant = positionRand1 + (positionRand2 - positionRand3) .* Levy(dim);
                 mutant = max(min(mutant, ub), lb); % Ensure within bounds
             elseif r <= p1 + p2
-                % DE_currentToBest
+                % DE_currentToRand
                 % Select two random indices
                 indices = randperm(searchAgentsNum, 2);
                 positionRand1 = positions(indices(1), :);
