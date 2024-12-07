@@ -8,7 +8,6 @@ function [bestFitness, bestPosition, convergenceCurve] = DP(searchAgentsNum, max
     historyBestPositions = positions;
     t = 0;
     fe = 0;
-    worstFitness = -inf;
 
     while fe < maxFes
 
@@ -17,7 +16,6 @@ function [bestFitness, bestPosition, convergenceCurve] = DP(searchAgentsNum, max
             FL = positions(i, :) < lb;
             positions(i, :) = (positions(i, :) .* (~(FU + FL))) + ub .* FU + lb .* FL;
             fitness(i) = fobj(positions(i, :));
-            worstFitness = max(worstFitness, fitness(i));
             fe = fe + 1;
 
             if fitness(i) < bestFitness
@@ -42,7 +40,7 @@ function [bestFitness, bestPosition, convergenceCurve] = DP(searchAgentsNum, max
             delta = fitness(i) - bestFitness;
             dp = zeros(1, dim);
 
-            if delta <= 0.2 * (1 - (fe / maxFes)) * epsilon
+            if delta <= 0.5 * epsilon
 
                 for j = 1:dim
 
@@ -54,8 +52,6 @@ function [bestFitness, bestPosition, convergenceCurve] = DP(searchAgentsNum, max
 
                 end
 
-            elseif delta <= 0.7 * (1 - (fe / maxFes)) * epsilon
-                dp = 2 * randi([0, 1], 1, dim) - 1;
             else
 
                 for j = 1:dim
@@ -70,32 +66,45 @@ function [bestFitness, bestPosition, convergenceCurve] = DP(searchAgentsNum, max
 
             end
 
+            [alpha, beta, gamma] = dynamicPharameterAdjustment(fe, maxFes);
             r = rand;
 
-            if fe * 2 <= maxFes
-
-                if r <= 0.7
-                    positions(i, :) = positions(i, :) + (2 * rand) * abs(bestPosition - positions(i, :)) .* dp;
-                else
-                    idx = getRandIndex(i, searchAgentsNum, 1);
-                    positions(i, :) = positions(i, :) + (2 * rand) * (positions(idx, :) - positions(i, :)) .* Levy(dim);
-                end
-
+            if r <= 1/3
+                positions(i, :) = alpha * positions(i, :) + beta * (bestPosition - rand(1, dim)) .* dp;
+            elseif r <= 2/3
+                positions(i, :) = alpha * positions(i, :) + beta * (historyBestPositions(i, :) - rand(1, dim)) .* dp;
             else
-
-                if r <= 0.3
-                    positions(i, :) = positions(i, :) + (1 - fe / maxFes) * abs(bestPosition - positions(i, :)) .* dp;
-                else
-                    idx = getRandIndex(i, searchAgentsNum, 1);
-                    positions(i, :) = positions(i, :) + (2 * rand) * (positions(idx, :) - positions(i, :)) .* Levy(dim);
-                end
-
+                idx = getRandIndex(i, searchAgentsNum, 1);
+                positions(i, :) = alpha * positions(i, :) + beta * (positions(idx, :) - rand(1, dim)) .* dp;
             end
 
         end
 
         t = t + 1;
         convergenceCurve(t) = bestFitness;
+    end
+
+end
+
+function [alpha, beta, gamma] = dynamicPharameterAdjustment(fe, maxFes)
+    % Dynamic programming function to adjust parameters based on search phase
+    % and historical data (e.g., search progress)
+
+    % Adjust alpha, beta, lr based on current progress and fitness
+    progress = fe / maxFes;
+
+    if progress <= 1/3
+        alpha = 0.5;
+        beta = 0.6;
+        gamma = 0.1;
+    elseif progress <= 2/3
+        alpha = 0.4;
+        beta = 0.5;
+        gamma = 0.05;
+    else
+        alpha = 0.6;
+        beta = 0.7;
+        gamma = 0.01;
     end
 
 end

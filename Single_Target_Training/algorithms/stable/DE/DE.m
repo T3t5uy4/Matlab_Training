@@ -1,4 +1,4 @@
-function [bestFitness, bestPosition, convergenceCurve] = DE_best_1(searchAgentsNum, maxFes, lb, ub, dim, fobj)
+function [bestFitness, bestPosition, convergenceCurve] = DE_rand_1(searchAgentsNum, maxFes, lb, ub, dim, fobj)
     % Initialize position vector and fitness for the best
     bestFitness = inf;
     bestPosition = zeros(1, dim);
@@ -33,12 +33,13 @@ function [bestFitness, bestPosition, convergenceCurve] = DE_best_1(searchAgentsN
 
         for i = 1:size(positions, 1)
             % Select three random indices
-            indices = randperm(searchAgentsNum, 2);
+            indices = randperm(searchAgentsNum, 3);
             positionRand1 = positions(indices(1), :);
             positionRand2 = positions(indices(2), :);
+            positionRand3 = positions(indices(3), :);
 
             % Mutation
-            mutant = bestPosition + F * (positionRand1 - positionRand2);
+            mutant = positionRand1 + F * (positionRand2 - positionRand3);
             mutant = max(min(mutant, ub), lb); % Ensure within bounds
 
             % Crossover

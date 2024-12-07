@@ -12,14 +12,14 @@ numOfRecord = 40;
 % population dimension
 dimValue = 30;
 % Maximum number of iterations, recommended maximum training is 300,000
-maxFes = 30000;
+maxFes = 300000;
 % Fold is recommended to be set to 30
 fold = 3;
 
 %% Algorithm Select
 % Select the algorithm to be trained
 % Please do not select more than 13 algorithms
-algorithmName = {'DP_v8', 'DP_v7', 'DP_v6', 'DP_v5', 'DP_v4', 'DP_v3', 'DP_v2', 'DP_v1'};
+algorithmName = {'DP_v9', 'DP_v8', 'DP_v7', 'DP_v6', 'HHO'};
 remarkStr = 'versionpk';
 
 %% Select training data set
@@ -86,7 +86,7 @@ for functionNum = 1:size(functionNameList, 2)
 
     tic
 
-    parfor cfold = 1:fold
+    for cfold = 1:fold
         % for cfold = 1:fold
 
         for cnum = 1:algorithmNum
